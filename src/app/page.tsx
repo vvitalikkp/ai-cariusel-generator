@@ -256,6 +256,18 @@ async function regenerateSlide(index: number) {
           <h2 className="text-2xl font-black mb-8 text-center">
             Your carousel — <span className="text-purple-400">{slides.length} slides</span>
           </h2>
+          {/* Slide preview panel */}
+<div className="flex gap-2 justify-center mb-6 flex-wrap">
+  {slides.map((_, i) => (
+    <button
+      key={i}
+      onClick={() => document.getElementById(`slide-${i}`)?.scrollIntoView({ behavior: "smooth", block: "center" })}
+      className="w-8 h-8 rounded-full bg-white/10 hover:bg-purple-500 transition text-xs font-bold text-white/60 hover:text-white border border-white/10"
+    >
+      {i + 1}
+    </button>
+  ))}
+</div>
 {/* Color & Font controls */}
 <div className="flex flex-wrap gap-4 justify-center mb-6">
   <div className="flex items-center gap-2">
