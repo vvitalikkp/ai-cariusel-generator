@@ -79,6 +79,8 @@ export default function Home() {
   const [style, setStyle] = useState<TemplateKey>("Viral");
   const [slides, setSlides] = useState<Slide[]>([]);
   const [loading, setLoading] = useState(false);
+  const [linkedInPost, setLinkedInPost] = useState("")
+const [loadingPost, setLoadingPost] = useState(false)
 const [cardColor, setCardColor] = useState("#2d1b69")
 const [cardFont, setCardFont] = useState("font-sans")
 const [userName, setUserName] = useState("CarouselAI")
@@ -111,6 +113,27 @@ const [userAvatar, setUserAvatar] = useState<string | null>(null)
     });
   }
 async function regenerateSlide(index: number) {
+  async function generateLinkedInPost() {
+  setLoadingPost(true)
+  try {
+    const slidesText = slides.map((s, i) => `${i + 1}. ${s.title}: ${s.description}`).join("\n")
+    const res = await fetch("/api/generate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ 
+        idea: `Write a LinkedIn post (max 200 words) to introduce this carousel about: ${idea}. Slides: ${slidesText}. Include hook, value, and CTA. Add relevant emojis.`, 
+        style 
+      }),
+    })
+    const data = await res.json()
+    if (data.slides?.[0]?.title) {
+      setLinkedInPost(data.slides[0].title + "\n\n" + data.slides[0].description)
+    }
+  } catch (e) {
+    console.error(e)
+  }
+  setLoadingPost(false)
+}
   try {
     const res = await fetch("/api/generate", {
       method: "POST",
@@ -417,7 +440,28 @@ async function regenerateSlide(index: number) {
             >
               Copy All Text
             </button>
+            <button
+  onClick={generateLinkedInPost}
+  disabled={loadingPost}
+  className="px-8 py-4 rounded-2xl bg-blue-600 hover:bg-blue-500 transition font-bold disabled:opacity-50"
+>
+  {loadingPost ? "Generating..." : "✍️ LinkedIn Post"}
+</button>
           </div>
+          {linkedInPost && (
+  <div className="mt-6 p-6 bg-white/5 border border-white/10 rounded-2xl">
+    <div className="flex justify-between items-center mb-3">
+      <span className="text-sm text-zinc-400">LinkedIn Post</span>
+      <button
+        onClick={() => navigator.clipboard.writeText(linkedInPost)}
+        className="text-xs text-purple-400 hover:text-purple-300"
+      >
+        Copy
+      </button>
+    </div>
+    <p className="text-sm text-zinc-300 whitespace-pre-wrap">{linkedInPost}</p>
+  </div>
+)}
         </section>
       )}
 
