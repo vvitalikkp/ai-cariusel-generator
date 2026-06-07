@@ -82,7 +82,25 @@ const [userAvatar, setUserAvatar] = useState<string | null>(null)
       return next;
     });
   }
-
+async function regenerateSlide(index: number) {
+  try {
+    const res = await fetch("/api/generate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ idea, style }),
+    });
+    const data = await res.json();
+    if (data.slides?.[index]) {
+      setSlides((prev) => {
+        const next = [...prev];
+        next[index] = data.slides[index];
+        return next;
+      });
+    }
+  } catch (e) {
+    console.error(e);
+  }
+}
   async function downloadPNG() {
     const zip = new JSZip();
     for (let i = 0; i < slides.length; i++) {
@@ -263,7 +281,7 @@ const [userAvatar, setUserAvatar] = useState<string | null>(null)
   <div
     key={i}
     id={`slide-${i}`}
-    className={`relative rounded-[28px] overflow-hidden`}
+    className={`relative rounded-[28px] overflow-hidden group`}
     style={{
       width: "100%",
       aspectRatio: "1/1",
@@ -301,6 +319,13 @@ const [userAvatar, setUserAvatar] = useState<string | null>(null)
           className={`w-full bg-transparent resize-none outline-none leading-relaxed text-sm ${t.desc}`}
           rows={3}
         />
+        {/* Regenerate button */}
+<button
+  onClick={() => regenerateSlide(i)}
+  className="absolute top-3 left-1/2 -translate-x-1/2 opacity-0 hover:opacity-100 group-hover:opacity-100 transition text-[10px] text-white/40 hover:text-white/80 bg-white/5 px-3 py-1 rounded-full"
+>
+  ↻ regenerate
+</button>
         {/* Footer */}
        <div className="flex items-center gap-2 mt-4 pt-4 border-t border-white/10">
   {userAvatar ? (
