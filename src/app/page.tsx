@@ -383,12 +383,10 @@ export default function Home() {
                     <textarea
                       value={slide.description}
                       onChange={(e) => updateSlide(i, "description", e.target.value)}
-                      className={`w-full bg-transparent resize-none outline-none leading-relaxed text-sm ${t.desc}`}
+                      className={`w-full bg-transparent resize-none outline-none leading-relaxed text-sm overflow-hidden ${t.desc}`}
                       rows={3}
                     />
-                    <div className={`text-right text-[10px] mt-1 ${slide.description.length > 250 ? 'text-red-400' : 'text-white/20'}`}>
-                      {slide.description.length}/300
-                    </div>
+                
                   </div>
 
                   {/* Regenerate button */}
