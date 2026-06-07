@@ -90,10 +90,11 @@ async function regenerateSlide(index: number) {
       body: JSON.stringify({ idea, style }),
     });
     const data = await res.json();
-    if (data.slides?.[index]) {
+    if (data.slides?.length > 0) {
+      const newSlide = data.slides[index] || data.slides[0];
       setSlides((prev) => {
         const next = [...prev];
-        next[index] = data.slides[index];
+        next[index] = newSlide;
         return next;
       });
     }
@@ -322,7 +323,7 @@ async function regenerateSlide(index: number) {
         {/* Regenerate button */}
 <button
   onClick={() => regenerateSlide(i)}
-  className="absolute top-3 left-1/2 -translate-x-1/2 opacity-0 hover:opacity-100 group-hover:opacity-100 transition text-[10px] text-white/40 hover:text-white/80 bg-white/5 px-3 py-1 rounded-full"
+  className="absolute top-3 left-1/2 -translate-x-1/2 text-[10px] text-white/40 hover:text-white transition bg-white/5 hover:bg-white/10 px-3 py-1 rounded-full border border-white/10"
 >
   ↻ regenerate
 </button>
