@@ -445,7 +445,7 @@ async function regenerateSlide(index: number) {
   disabled={loadingPost}
   className="px-8 py-4 rounded-2xl bg-blue-600 hover:bg-blue-500 transition font-bold disabled:opacity-50"
 >
-  {loadingPost ? "Generating..." : "✍️ LinkedIn Post"}
+  {loadingPost ? "Generating..." : "LinkedIn Post"}
 </button>
           </div>
           {linkedInPost && (
