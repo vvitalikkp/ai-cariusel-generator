@@ -14,7 +14,7 @@ export async function POST(req: Request) {
     const { idea, style } = body
 
     const response = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo",
+      model: "gpt-4o-mini",
       messages: [
         {
           role: "user",
