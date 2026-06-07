@@ -21,7 +21,7 @@ export async function POST(req: Request) {
           content: `Create a LinkedIn carousel about: ${idea}. Style: ${style}. 
 Return ONLY a valid JSON array of exactly 6 slides. Each slide must have:
 - "title": short punchy title (max 6 words) with a relevant emoji at the start
-- "description": 1-2 sentences max
+- "description": 3-5 sentences with specific details, examples, or actionable insights. Make it substantial and valuable.
 - "type": one of [hook, problem, mistake, solution, framework, cta]
 
 Slide structure:
