@@ -313,7 +313,7 @@ async function regenerateSlide(index: number) {
     className={`relative rounded-[28px] overflow-hidden group`}
     style={{
       width: "100%",
-      aspectRatio: "1/1",
+      aspectRatio: "4/5",
       background: i % 2 === 0 
         ? `linear-gradient(135deg, ${cardColor} 0%, ${cardColor}99 50%, ${cardColor} 100%)`
 : `linear-gradient(135deg, #0f0f1a 0%, ${cardColor}44 50%, #0f0f1a 100%)`,
