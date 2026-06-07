@@ -18,7 +18,21 @@ export async function POST(req: Request) {
       messages: [
         {
           role: "user",
-          content: `Create a LinkedIn carousel about: ${idea}. Style: ${style}. Return ONLY a JSON array of 6 slides, each with "title" and "description" fields. IMPORTANT: Do NOT include slide numbers in titles. Titles should be short and punchy, max 8 words.`
+          content: `Create a LinkedIn carousel about: ${idea}. Style: ${style}. 
+Return ONLY a valid JSON array of exactly 6 slides. Each slide must have:
+- "title": short punchy title (max 6 words) with a relevant emoji at the start
+- "description": 1-2 sentences max
+- "type": one of [hook, problem, mistake, solution, framework, cta]
+
+Slide structure:
+1. Hook - grab attention with bold claim
+2. Problem - pain point people relate to
+3. Mistake - common mistake people make
+4. Solution - the key insight
+5. Framework - actionable steps
+6. CTA - call to action
+
+Return ONLY the JSON array, no markdown, no extra text.`,
         }
       ]
     })
