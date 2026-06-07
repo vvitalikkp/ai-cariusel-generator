@@ -36,6 +36,34 @@ const TEMPLATES = {
     dot: "bg-cyan-400 shadow-[0_0_12px_#22d3ee]",
     num: "text-cyan-300",
   },
+  Light: {
+    card: "bg-white border border-gray-100",
+    title: "text-gray-900 font-black text-3xl tracking-tight",
+    desc: "text-gray-500",
+    dot: "bg-purple-500",
+    num: "text-gray-300",
+  },
+  Gradient: {
+    card: "bg-gradient-to-br from-violet-600 to-indigo-600 border-0",
+    title: "text-white font-black text-3xl",
+    desc: "text-white/70",
+    dot: "bg-yellow-300 shadow-[0_0_12px_#fde047]",
+    num: "text-white/30",
+  },
+  Bold: {
+    card: "bg-yellow-400 border-0",
+    title: "text-black font-black text-3xl uppercase tracking-tighter",
+    desc: "text-black/60",
+    dot: "bg-black",
+    num: "text-black/20",
+  },
+  Neon: {
+    card: "bg-black border border-green-400/30",
+    title: "text-green-400 font-black text-3xl",
+    desc: "text-green-200/60",
+    dot: "bg-green-400 shadow-[0_0_12px_#4ade80]",
+    num: "text-green-900",
+  },
 } as const;
 
 type TemplateKey = keyof typeof TEMPLATES;
