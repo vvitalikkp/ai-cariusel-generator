@@ -386,8 +386,8 @@ export default function Home() {
                       className={`w-full bg-transparent resize-none outline-none leading-relaxed text-sm ${t.desc}`}
                       rows={3}
                     />
-                    <div className={`text-right text-[10px] mt-1 ${slide.description.length > 130 ? 'text-red-400' : 'text-white/20'}`}>
-                      {slide.description.length}/150
+                    <div className={`text-right text-[10px] mt-1 ${slide.description.length > 250 ? 'text-red-400' : 'text-white/20'}`}>
+                      {slide.description.length}/300
                     </div>
                   </div>
 
