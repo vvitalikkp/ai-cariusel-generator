@@ -80,11 +80,11 @@ export default function Home() {
   const [slides, setSlides] = useState<Slide[]>([]);
   const [loading, setLoading] = useState(false);
   const [linkedInPost, setLinkedInPost] = useState("")
-const [loadingPost, setLoadingPost] = useState(false)
-const [cardColor, setCardColor] = useState("#2d1b69")
-const [cardFont, setCardFont] = useState("font-sans")
-const [userName, setUserName] = useState("CarouselAI")
-const [userAvatar, setUserAvatar] = useState<string | null>(null)
+  const [loadingPost, setLoadingPost] = useState(false)
+  const [cardColor, setCardColor] = useState("#2d1b69")
+  const [cardFont, setCardFont] = useState("font-sans")
+  const [userName, setUserName] = useState("CarouselAI")
+  const [userAvatar, setUserAvatar] = useState<string | null>(null)
   const t = TEMPLATES[style];
 
   async function generateSlides() {
@@ -112,47 +112,50 @@ const [userAvatar, setUserAvatar] = useState<string | null>(null)
       return next;
     });
   }
-async function regenerateSlide(index: number) {
-  async function generateLinkedInPost() {
-  setLoadingPost(true)
-  try {
-    const slidesText = slides.map((s, i) => `${i + 1}. ${s.title}: ${s.description}`).join("\n")
-    const res = await fetch("/api/generate", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ 
-        idea: `Write a LinkedIn post (max 200 words) to introduce this carousel about: ${idea}. Slides: ${slidesText}. Include hook, value, and CTA. Add relevant emojis.`, 
-        style 
-      }),
-    })
-    const data = await res.json()
-    if (data.slides?.[0]?.title) {
-      setLinkedInPost(data.slides[0].title + "\n\n" + data.slides[0].description)
-    }
-  } catch (e) {
-    console.error(e)
-  }
-  setLoadingPost(false)
-}
-  try {
-    const res = await fetch("/api/generate", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ idea, style }),
-    });
-    const data = await res.json();
-    if (data.slides?.length > 0) {
-      const newSlide = data.slides[index] || data.slides[0];
-      setSlides((prev) => {
-        const next = [...prev];
-        next[index] = newSlide;
-        return next;
+
+  async function regenerateSlide(index: number) {
+    try {
+      const res = await fetch("/api/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ idea, style }),
       });
+      const data = await res.json();
+      if (data.slides?.length > 0) {
+        const newSlide = data.slides[index] || data.slides[0];
+        setSlides((prev) => {
+          const next = [...prev];
+          next[index] = newSlide;
+          return next;
+        });
+      }
+    } catch (e) {
+      console.error(e);
     }
-  } catch (e) {
-    console.error(e);
   }
-}
+
+  async function generateLinkedInPost() {
+    setLoadingPost(true)
+    try {
+      const slidesText = slides.map((s, i) => `${i + 1}. ${s.title}: ${s.description}`).join("\n")
+      const res = await fetch("/api/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          idea: `Write a LinkedIn post (max 200 words) to introduce this carousel about: ${idea}. Slides: ${slidesText}. Include hook, value, and CTA. Add relevant emojis.`, 
+          style 
+        }),
+      })
+      const data = await res.json()
+      if (data.slides?.[0]?.title) {
+        setLinkedInPost(data.slides[0].title + "\n\n" + data.slides[0].description)
+      }
+    } catch (e) {
+      console.error(e)
+    }
+    setLoadingPost(false)
+  }
+
   async function downloadPNG() {
     const zip = new JSZip();
     for (let i = 0; i < slides.length; i++) {
@@ -166,29 +169,30 @@ async function regenerateSlide(index: number) {
     saveAs(content, "carousel.zip");
   }
 
- async function downloadPDF() {
-  const firstEl = document.getElementById(`slide-0`);
-  if (!firstEl) return;
-  
-  const w = firstEl.offsetWidth;
-  const h = firstEl.offsetHeight;
-  
-  const pdf = new jsPDF({
-    orientation: w > h ? "landscape" : "portrait",
-    unit: "px",
-    format: [w, h],
-  });
+  async function downloadPDF() {
+    const firstEl = document.getElementById(`slide-0`);
+    if (!firstEl) return;
+    
+    const w = firstEl.offsetWidth;
+    const h = firstEl.offsetHeight;
+    
+    const pdf = new jsPDF({
+      orientation: w > h ? "landscape" : "portrait",
+      unit: "px",
+      format: [w, h],
+    });
 
-  for (let i = 0; i < slides.length; i++) {
-    const el = document.getElementById(`slide-${i}`);
-    if (!el) continue;
-    const dataUrl = await toPng(el, { pixelRatio: 2, backgroundColor: "#000000" });
-    if (i > 0) pdf.addPage();
-    pdf.addImage(dataUrl, "PNG", 0, 0, w, h);
+    for (let i = 0; i < slides.length; i++) {
+      const el = document.getElementById(`slide-${i}`);
+      if (!el) continue;
+      const dataUrl = await toPng(el, { pixelRatio: 2, backgroundColor: "#000000" });
+      if (i > 0) pdf.addPage();
+      pdf.addImage(dataUrl, "PNG", 0, 0, w, h);
+    }
+
+    pdf.save("carousel.pdf");
   }
 
-  pdf.save("carousel.pdf");
-}
   return (
     <main className="min-h-screen bg-black text-white overflow-x-hidden relative">
 
@@ -248,7 +252,7 @@ async function regenerateSlide(index: number) {
 
             {/* Input + button */}
             <div className="flex gap-3">
-      <textarea
+              <textarea
                 placeholder="Paste your text, tweet, article or just an idea..."
                 value={idea}
                 onChange={(e) => setIdea(e.target.value)}
@@ -280,141 +284,140 @@ async function regenerateSlide(index: number) {
             Your carousel — <span className="text-purple-400">{slides.length} slides</span>
           </h2>
           {/* Slide preview panel */}
-<div className="flex gap-2 justify-center mb-6 flex-wrap">
-  {slides.map((_, i) => (
-    <button
-      key={i}
-      onClick={() => document.getElementById(`slide-${i}`)?.scrollIntoView({ behavior: "smooth", block: "center" })}
-      className="w-8 h-8 rounded-full bg-white/10 hover:bg-purple-500 transition text-xs font-bold text-white/60 hover:text-white border border-white/10"
-    >
-      {i + 1}
-    </button>
-  ))}
-</div>
-{/* Color & Font controls */}
-<div className="flex flex-wrap gap-4 justify-center mb-6">
-  <div className="flex items-center gap-2">
-    <span className="text-sm text-zinc-400">Color:</span>
-    {["#2d1b69", "#1a3a2d", "#1a1a3e", "#3a1a1a", "#1a2a3a"].map((color) => (
-      <button
-        key={color}
-        onClick={() => setCardColor(color)}
-        className="w-6 h-6 rounded-full border-2 border-transparent hover:border-white transition"
-        style={{ backgroundColor: color }}
-      />
-    ))}
-  </div>
-  <div className="flex items-center gap-2">
-    <span className="text-sm text-zinc-400">Font:</span>
-    {["font-sans", "font-serif", "font-mono"].map((font) => (
-      <button
-        key={font}
-        onClick={() => setCardFont(font)}
-        className={`text-xs px-3 py-1 rounded-full border border-white/20 hover:border-white transition ${cardFont === font ? "bg-white/20" : ""}`}
-      >
-        {font.replace("font-", "")}
-      </button>
-    ))}
-  </div>
-  <div className="flex items-center gap-3 mt-2">
-  <span className="text-sm text-zinc-400">Name:</span>
-  <input
-    type="text"
-    value={userName}
-    onChange={(e) => setUserName(e.target.value)}
-    className="bg-white/10 text-white text-sm px-3 py-1 rounded-full outline-none border border-white/20 w-32"
-    placeholder="Your name"
-  />
-  <label className="cursor-pointer text-sm text-zinc-400 hover:text-white transition">
-    📷 Photo
-    <input type="file" accept="image/*" className="hidden"
-      onChange={(e) => {
-        const file = e.target.files?.[0]
-        if (file) {
-          const reader = new FileReader()
-          reader.onload = () => setUserAvatar(reader.result as string)
-          reader.readAsDataURL(file)
-        }
-      }}
-    />
-  </label>
-</div>
-</div>
+          <div className="flex gap-2 justify-center mb-6 flex-wrap">
+            {slides.map((_, i) => (
+              <button
+                key={i}
+                onClick={() => document.getElementById(`slide-${i}`)?.scrollIntoView({ behavior: "smooth", block: "center" })}
+                className="w-8 h-8 rounded-full bg-white/10 hover:bg-purple-500 transition text-xs font-bold text-white/60 hover:text-white border border-white/10"
+              >
+                {i + 1}
+              </button>
+            ))}
+          </div>
+          {/* Color & Font controls */}
+          <div className="flex flex-wrap gap-4 justify-center mb-6">
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-zinc-400">Color:</span>
+              {["#2d1b69", "#1a3a2d", "#1a1a3e", "#3a1a1a", "#1a2a3a"].map((color) => (
+                <button
+                  key={color}
+                  onClick={() => setCardColor(color)}
+                  className="w-6 h-6 rounded-full border-2 border-transparent hover:border-white transition"
+                  style={{ backgroundColor: color }}
+                />
+              ))}
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-zinc-400">Font:</span>
+              {["font-sans", "font-serif", "font-mono"].map((font) => (
+                <button
+                  key={font}
+                  onClick={() => setCardFont(font)}
+                  className={`text-xs px-3 py-1 rounded-full border border-white/20 hover:border-white transition ${cardFont === font ? "bg-white/20" : ""}`}
+                >
+                  {font.replace("font-", "")}
+                </button>
+              ))}
+            </div>
+            <div className="flex items-center gap-3 mt-2">
+              <span className="text-sm text-zinc-400">Name:</span>
+              <input
+                type="text"
+                value={userName}
+                onChange={(e) => setUserName(e.target.value)}
+                className="bg-white/10 text-white text-sm px-3 py-1 rounded-full outline-none border border-white/20 w-32"
+                placeholder="Your name"
+              />
+              <label className="cursor-pointer text-sm text-zinc-400 hover:text-white transition">
+                📷 Photo
+                <input type="file" accept="image/*" className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0]
+                    if (file) {
+                      const reader = new FileReader()
+                      reader.onload = () => setUserAvatar(reader.result as string)
+                      reader.readAsDataURL(file)
+                    }
+                  }}
+                />
+              </label>
+            </div>
+          </div>
           <div className="space-y-4">
             {slides.map((slide, i) => (
-  <div
-    key={i}
-    id={`slide-${i}`}
-    className={`relative rounded-[28px] overflow-hidden group`}
-    style={{
-      width: "100%",
-      aspectRatio: "4/5",
-      background: i % 2 === 0 
-        ? `linear-gradient(135deg, ${cardColor} 0%, ${cardColor}99 50%, ${cardColor} 100%)`
-: `linear-gradient(135deg, #0f0f1a 0%, ${cardColor}44 50%, #0f0f1a 100%)`,
-    }}
-  >
+              <div
+                key={i}
+                id={`slide-${i}`}
+                className={`relative rounded-[28px] overflow-hidden group`}
+                style={{
+                  width: "100%",
+                  aspectRatio: "4/5",
+                  background: i % 2 === 0 
+                    ? `linear-gradient(135deg, ${cardColor} 0%, ${cardColor}99 50%, ${cardColor} 100%)`
+                    : `linear-gradient(135deg, #0f0f1a 0%, ${cardColor}44 50%, #0f0f1a 100%)`,
+                }}
+              >
+                {/* Content */}
+                <div className="relative z-10 flex flex-col justify-between h-full p-8">
+                  {/* Top */}
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold tracking-[0.3em] uppercase text-purple-400">
+                      {String(i + 1).padStart(2, "0")} / {slides.length.toString().padStart(2, "0")}
+                    </span>
+                    <div className={`w-2.5 h-2.5 rounded-full ${t.dot}`} />
+                  </div>
 
-    {/* Content */}
-    <div className="relative z-10 flex flex-col justify-between h-full p-8">
-      {/* Top */}
-      <div className="flex items-center justify-between">
-        <span className="text-xs font-bold tracking-[0.3em] uppercase text-purple-400">
-          {String(i + 1).padStart(2, "0")} / {slides.length.toString().padStart(2, "0")}
-        </span>
-        <div className={`w-2.5 h-2.5 rounded-full ${t.dot}`} />
-      </div>
+                  {/* Title */}
+                  <div className="flex-1 flex items-center py-6">
+                    <textarea
+                      value={slide.title}
+                      onChange={(e) => updateSlide(i, "title", e.target.value)}
+                      className={`w-full bg-transparent resize-none outline-none leading-tight text-3xl font-black ${t.title}`}
+                      rows={3}
+                    />
+                  </div>
 
-      {/* Title */}
-      <div className="flex-1 flex items-center py-6">
-        <textarea
-          value={slide.title}
-          onChange={(e) => updateSlide(i, "title", e.target.value)}
-          className={`w-full bg-transparent resize-none outline-none leading-tight text-3xl font-black ${t.title}`}
-          rows={3}
-        />
-      </div>
+                  {/* Description */}
+                  <div>
+                    <textarea
+                      value={slide.description}
+                      onChange={(e) => updateSlide(i, "description", e.target.value)}
+                      className={`w-full bg-transparent resize-none outline-none leading-relaxed text-sm ${t.desc}`}
+                      rows={3}
+                    />
+                    <div className={`text-right text-[10px] mt-1 ${slide.description.length > 130 ? 'text-red-400' : 'text-white/20'}`}>
+                      {slide.description.length}/150
+                    </div>
+                  </div>
 
-      {/* Description */}
-      <div>
-        <textarea
-          value={slide.description}
-          onChange={(e) => updateSlide(i, "description", e.target.value)}
-          className={`w-full bg-transparent resize-none outline-none leading-relaxed text-sm ${t.desc}`}
-          rows={3}
-        />
-    <div className={`text-right text-[10px] mt-1 ${slide.description.length > 130 ? 'text-red-400' : 'text-white/20'}`}>
-  {slide.description.length}/150
-</div>
-</div>
-        {/* Regenerate button */}
-<button
-  onClick={() => regenerateSlide(i)}
-  className="absolute top-3 left-1/2 -translate-x-1/2 text-[10px] text-white/40 hover:text-white transition bg-white/5 hover:bg-white/10 px-3 py-1 rounded-full border border-white/10"
->
-  ↻ regenerate
-</button>
-        {/* Footer */}
-       <div className="flex items-center gap-2 mt-4 pt-4 border-t border-white/10">
-  {userAvatar ? (
-    <img src={userAvatar} className="w-6 h-6 rounded-full object-cover" />
-  ) : (
-    <div className="w-6 h-6 rounded-full bg-purple-500 flex items-center justify-center text-xs font-bold text-white">
-      {userName[0]}
-    </div>
-  )}
- <span className="text-xs text-white/40">{userName}</span>
-</div>
+                  {/* Regenerate button */}
+                  <button
+                    onClick={() => regenerateSlide(i)}
+                    className="absolute top-3 left-1/2 -translate-x-1/2 text-[10px] text-white/40 hover:text-white transition bg-white/5 hover:bg-white/10 px-3 py-1 rounded-full border border-white/10"
+                  >
+                    ↻ regenerate
+                  </button>
 
-{/* Watermark */}
-<div className="absolute bottom-3 right-4 text-[10px] text-white/20 font-medium tracking-widest uppercase">
-  Made with CarouselAI
-</div>
-      </div>
-    </div>
-  </div>
-))}
-            
+                  {/* Footer */}
+                  <div className="flex items-center gap-2 mt-4 pt-4 border-t border-white/10">
+                    {userAvatar ? (
+                      <img src={userAvatar} className="w-6 h-6 rounded-full object-cover" />
+                    ) : (
+                      <div className="w-6 h-6 rounded-full bg-purple-500 flex items-center justify-center text-xs font-bold text-white">
+                        {userName[0]}
+                      </div>
+                    )}
+                    <span className="text-xs text-white/40">{userName}</span>
+                  </div>
+
+                  {/* Watermark */}
+                  <div className="absolute bottom-3 right-4 text-[10px] text-white/20 font-medium tracking-widest uppercase">
+                    Made with CarouselAI
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
 
           {/* Export buttons */}
@@ -441,27 +444,27 @@ async function regenerateSlide(index: number) {
               Copy All Text
             </button>
             <button
-  onClick={generateLinkedInPost}
-  disabled={loadingPost}
-  className="px-8 py-4 rounded-2xl bg-blue-600 hover:bg-blue-500 transition font-bold disabled:opacity-50"
->
-  {loadingPost ? "Generating..." : "LinkedIn Post"}
-</button>
+              onClick={generateLinkedInPost}
+              disabled={loadingPost}
+              className="px-8 py-4 rounded-2xl bg-blue-600 hover:bg-blue-500 transition font-bold disabled:opacity-50"
+            >
+              {loadingPost ? "Generating..." : "LinkedIn Post"}
+            </button>
           </div>
           {linkedInPost && (
-  <div className="mt-6 p-6 bg-white/5 border border-white/10 rounded-2xl">
-    <div className="flex justify-between items-center mb-3">
-      <span className="text-sm text-zinc-400">LinkedIn Post</span>
-      <button
-        onClick={() => navigator.clipboard.writeText(linkedInPost)}
-        className="text-xs text-purple-400 hover:text-purple-300"
-      >
-        Copy
-      </button>
-    </div>
-    <p className="text-sm text-zinc-300 whitespace-pre-wrap">{linkedInPost}</p>
-  </div>
-)}
+            <div className="mt-6 p-6 bg-white/5 border border-white/10 rounded-2xl">
+              <div className="flex justify-between items-center mb-3">
+                <span className="text-sm text-zinc-400">LinkedIn Post</span>
+                <button
+                  onClick={() => navigator.clipboard.writeText(linkedInPost)}
+                  className="text-xs text-purple-400 hover:text-purple-300"
+                >
+                  Copy
+                </button>
+              </div>
+              <p className="text-sm text-zinc-300 whitespace-pre-wrap">{linkedInPost}</p>
+            </div>
+          )}
         </section>
       )}
 
@@ -474,61 +477,63 @@ async function regenerateSlide(index: number) {
         </section>
       )}
 
-{/* HOW IT WORKS */}
-<section className="relative z-10 max-w-4xl mx-auto py-20 px-6">
-  <div className="text-center mb-16">
-    <p className="text-purple-400 uppercase tracking-[0.3em] text-sm mb-4">How it works</p>
-    <h2 className="text-4xl font-black mb-4">3 steps to viral content</h2>
-    <p className="text-zinc-400">From idea to LinkedIn carousel in seconds</p>
-  </div>
-  <div className="grid md:grid-cols-3 gap-8">
-    <div className="text-center p-8 bg-white/5 border border-white/10 rounded-[28px]">
-      <div className="text-5xl font-black text-purple-400 mb-4">01</div>
-      <h3 className="text-xl font-bold mb-3">Paste your content</h3>
-      <p className="text-zinc-400 text-sm">Paste any text, tweet, article or just type your idea</p>
-    </div>
-    <div className="text-center p-8 bg-white/5 border border-white/10 rounded-[28px]">
-      <div className="text-5xl font-black text-purple-400 mb-4">02</div>
-      <h3 className="text-xl font-bold mb-3">AI generates slides</h3>
-      <p className="text-zinc-400 text-sm">AI creates Hook, Problem, Solution, CTA structure automatically</p>
-    </div>
-    <div className="text-center p-8 bg-white/5 border border-white/10 rounded-[28px]">
-      <div className="text-5xl font-black text-purple-400 mb-4">03</div>
-      <h3 className="text-xl font-bold mb-3">Export & post</h3>
-      <p className="text-zinc-400 text-sm">Download PNG or PDF and post directly to LinkedIn</p>
-    </div>
-  </div>
-</section>
-{/* TESTIMONIALS */}
-<section className="relative z-10 max-w-5xl mx-auto py-20 px-6">
-  <div className="text-center mb-12">
-    <p className="text-purple-400 uppercase tracking-[0.3em] text-sm mb-4">Testimonials</p>
-    <h2 className="text-4xl font-black mb-4">Creators love it</h2>
-  </div>
-  <div className="grid md:grid-cols-3 gap-6">
-    <div className="bg-white/5 border border-white/10 rounded-[24px] p-6">
-      <p className="text-zinc-300 text-sm mb-6">"I went from spending 2 hours on a carousel to 2 minutes. This tool is insane."</p>
-      <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-full bg-purple-600 flex items-center justify-center font-bold">A</div>
-        <div><p className="font-bold text-sm">Alex K.</p><p className="text-zinc-500 text-xs">LinkedIn Creator, 45k followers</p></div>
-      </div>
-    </div>
-    <div className="bg-white/5 border border-purple-500/30 rounded-[24px] p-6">
-      <p className="text-zinc-300 text-sm mb-6">"The Hook → Problem → Solution structure is exactly what top LinkedIn posts use. Game changer."</p>
-      <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-full bg-fuchsia-600 flex items-center justify-center font-bold">M</div>
-        <div><p className="font-bold text-sm">Maria S.</p><p className="text-zinc-500 text-xs">Startup Founder</p></div>
-      </div>
-    </div>
-    <div className="bg-white/5 border border-white/10 rounded-[24px] p-6">
-      <p className="text-zinc-300 text-sm mb-6">"My engagement went up 3x after I started using AI carousels. Best $19 I ever spent."</p>
-      <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-full bg-cyan-600 flex items-center justify-center font-bold">D</div>
-        <div><p className="font-bold text-sm">David N.</p><p className="text-zinc-500 text-xs">Marketing Director</p></div>
-      </div>
-    </div>
-  </div>
-</section>
+      {/* HOW IT WORKS */}
+      <section className="relative z-10 max-w-4xl mx-auto py-20 px-6">
+        <div className="text-center mb-16">
+          <p className="text-purple-400 uppercase tracking-[0.3em] text-sm mb-4">How it works</p>
+          <h2 className="text-4xl font-black mb-4">3 steps to viral content</h2>
+          <p className="text-zinc-400">From idea to LinkedIn carousel in seconds</p>
+        </div>
+        <div className="grid md:grid-cols-3 gap-8">
+          <div className="text-center p-8 bg-white/5 border border-white/10 rounded-[28px]">
+            <div className="text-5xl font-black text-purple-400 mb-4">01</div>
+            <h3 className="text-xl font-bold mb-3">Paste your content</h3>
+            <p className="text-zinc-400 text-sm">Paste any text, tweet, article or just type your idea</p>
+          </div>
+          <div className="text-center p-8 bg-white/5 border border-white/10 rounded-[28px]">
+            <div className="text-5xl font-black text-purple-400 mb-4">02</div>
+            <h3 className="text-xl font-bold mb-3">AI generates slides</h3>
+            <p className="text-zinc-400 text-sm">AI creates Hook, Problem, Solution, CTA structure automatically</p>
+          </div>
+          <div className="text-center p-8 bg-white/5 border border-white/10 rounded-[28px]">
+            <div className="text-5xl font-black text-purple-400 mb-4">03</div>
+            <h3 className="text-xl font-bold mb-3">Export & post</h3>
+            <p className="text-zinc-400 text-sm">Download PNG or PDF and post directly to LinkedIn</p>
+          </div>
+        </div>
+      </section>
+
+      {/* TESTIMONIALS */}
+      <section className="relative z-10 max-w-5xl mx-auto py-20 px-6">
+        <div className="text-center mb-12">
+          <p className="text-purple-400 uppercase tracking-[0.3em] text-sm mb-4">Testimonials</p>
+          <h2 className="text-4xl font-black mb-4">Creators love it</h2>
+        </div>
+        <div className="grid md:grid-cols-3 gap-6">
+          <div className="bg-white/5 border border-white/10 rounded-[24px] p-6">
+            <p className="text-zinc-300 text-sm mb-6">"I went from spending 2 hours on a carousel to 2 minutes. This tool is insane."</p>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-purple-600 flex items-center justify-center font-bold">A</div>
+              <div><p className="font-bold text-sm">Alex K.</p><p className="text-zinc-500 text-xs">LinkedIn Creator, 45k followers</p></div>
+            </div>
+          </div>
+          <div className="bg-white/5 border border-purple-500/30 rounded-[24px] p-6">
+            <p className="text-zinc-300 text-sm mb-6">"The Hook → Problem → Solution structure is exactly what top LinkedIn posts use. Game changer."</p>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-fuchsia-600 flex items-center justify-center font-bold">M</div>
+              <div><p className="font-bold text-sm">Maria S.</p><p className="text-zinc-500 text-xs">Startup Founder</p></div>
+            </div>
+          </div>
+          <div className="bg-white/5 border border-white/10 rounded-[24px] p-6">
+            <p className="text-zinc-300 text-sm mb-6">"My engagement went up 3x after I started using AI carousels. Best $19 I ever spent."</p>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-cyan-600 flex items-center justify-center font-bold">D</div>
+              <div><p className="font-bold text-sm">David N.</p><p className="text-zinc-500 text-xs">Marketing Director</p></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* PRICING */}
       <section className="relative z-10 max-w-6xl mx-auto py-32 px-6">
         <div className="text-center mb-16">
