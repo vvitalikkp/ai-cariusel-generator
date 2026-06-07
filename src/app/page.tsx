@@ -348,6 +348,9 @@ async function regenerateSlide(index: number) {
           className={`w-full bg-transparent resize-none outline-none leading-relaxed text-sm ${t.desc}`}
           rows={3}
         />
+        <div className="text-right text-[10px] text-white/20 mt-1">
+  {slide.description.length}/150
+</div>
         {/* Regenerate button */}
 <button
   onClick={() => regenerateSlide(i)}
