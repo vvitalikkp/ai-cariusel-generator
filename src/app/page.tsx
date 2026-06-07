@@ -4,6 +4,7 @@ import { useState } from "react";
 import { toPng } from "html-to-image";
 import JSZip from "jszip";
 import { saveAs } from "file-saver";
+import { SignInButton } from "./components/SignInButton"
 import jsPDF from "jspdf";
 
 const TEMPLATES = {
@@ -50,7 +51,10 @@ export default function Home() {
   const [style, setStyle] = useState<TemplateKey>("Viral");
   const [slides, setSlides] = useState<Slide[]>([]);
   const [loading, setLoading] = useState(false);
-
+const [cardColor, setCardColor] = useState("#2d1b69")
+const [cardFont, setCardFont] = useState("font-sans")
+const [userName, setUserName] = useState("CarouselAI")
+const [userAvatar, setUserAvatar] = useState<string | null>(null)
   const t = TEMPLATES[style];
 
   async function generateSlides() {
@@ -131,6 +135,7 @@ export default function Home() {
           <button className="hover:text-white transition">Features</button>
           <button className="hover:text-white transition">Pricing</button>
           <button className="hover:text-white transition">Github</button>
+          <SignInButton />
         </div>
       </nav>
 
@@ -204,42 +209,119 @@ export default function Home() {
           <h2 className="text-2xl font-black mb-8 text-center">
             Your carousel — <span className="text-purple-400">{slides.length} slides</span>
           </h2>
-
+{/* Color & Font controls */}
+<div className="flex flex-wrap gap-4 justify-center mb-6">
+  <div className="flex items-center gap-2">
+    <span className="text-sm text-zinc-400">Color:</span>
+    {["#2d1b69", "#1a3a2d", "#1a1a3e", "#3a1a1a", "#1a2a3a"].map((color) => (
+      <button
+        key={color}
+        onClick={() => setCardColor(color)}
+        className="w-6 h-6 rounded-full border-2 border-transparent hover:border-white transition"
+        style={{ backgroundColor: color }}
+      />
+    ))}
+  </div>
+  <div className="flex items-center gap-2">
+    <span className="text-sm text-zinc-400">Font:</span>
+    {["font-sans", "font-serif", "font-mono"].map((font) => (
+      <button
+        key={font}
+        onClick={() => setCardFont(font)}
+        className={`text-xs px-3 py-1 rounded-full border border-white/20 hover:border-white transition ${cardFont === font ? "bg-white/20" : ""}`}
+      >
+        {font.replace("font-", "")}
+      </button>
+    ))}
+  </div>
+  <div className="flex items-center gap-3 mt-2">
+  <span className="text-sm text-zinc-400">Name:</span>
+  <input
+    type="text"
+    value={userName}
+    onChange={(e) => setUserName(e.target.value)}
+    className="bg-white/10 text-white text-sm px-3 py-1 rounded-full outline-none border border-white/20 w-32"
+    placeholder="Your name"
+  />
+  <label className="cursor-pointer text-sm text-zinc-400 hover:text-white transition">
+    📷 Photo
+    <input type="file" accept="image/*" className="hidden"
+      onChange={(e) => {
+        const file = e.target.files?.[0]
+        if (file) {
+          const reader = new FileReader()
+          reader.onload = () => setUserAvatar(reader.result as string)
+          reader.readAsDataURL(file)
+        }
+      }}
+    />
+  </label>
+</div>
+</div>
           <div className="space-y-4">
             {slides.map((slide, i) => (
-              <div
-                key={i}
-                id={`slide-${i}`}
-                className={`relative rounded-[28px] p-8 min-h-[280px] flex flex-col justify-between ${t.card}`}
-              >
-                {/* Header */}
-                <div className="flex items-center justify-between mb-6">
-                  <span className={`text-xs font-bold tracking-[0.3em] uppercase ${t.num}`}>
-                    {String(i + 1).padStart(2, "0")}
-                  </span>
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs text-zinc-600 uppercase tracking-widest">{slide.type}</span>
-                    <div className={`w-2.5 h-2.5 rounded-full ${t.dot}`} />
-                  </div>
-                </div>
+  <div
+    key={i}
+    id={`slide-${i}`}
+    className={`relative rounded-[28px] overflow-hidden`}
+    style={{
+      width: "100%",
+      aspectRatio: "1/1",
+      background: i % 2 === 0 
+        ? `linear-gradient(135deg, ${cardColor} 0%, ${cardColor}99 50%, ${cardColor} 100%)`
+: `linear-gradient(135deg, #0f0f1a 0%, ${cardColor}44 50%, #0f0f1a 100%)`,
+    }}
+  >
 
-                {/* Editable title */}
-                <textarea
-                  value={slide.title}
-                  onChange={(e) => updateSlide(i, "title", e.target.value)}
-                  className={`w-full bg-transparent resize-none outline-none leading-tight mb-4 overflow-hidden ${t.title}`}
-                  rows={2}
-                />
+    {/* Content */}
+    <div className="relative z-10 flex flex-col justify-between h-full p-8">
+      {/* Top */}
+      <div className="flex items-center justify-between">
+        <span className="text-xs font-bold tracking-[0.3em] uppercase text-purple-400">
+          {String(i + 1).padStart(2, "0")} / {slides.length.toString().padStart(2, "0")}
+        </span>
+        <div className={`w-2.5 h-2.5 rounded-full ${t.dot}`} />
+      </div>
 
-                {/* Editable description */}
-                <textarea
-                  value={slide.description}
-                  onChange={(e) => updateSlide(i, "description", e.target.value)}
-                  className={`w-full bg-transparent resize-none outline-none leading-relaxed ${t.desc}`}
-                  rows={3}
-                />
-              </div>
-            ))}
+      {/* Title */}
+      <div className="flex-1 flex items-center py-6">
+        <textarea
+          value={slide.title}
+          onChange={(e) => updateSlide(i, "title", e.target.value)}
+          className={`w-full bg-transparent resize-none outline-none leading-tight text-3xl font-black ${t.title}`}
+          rows={3}
+        />
+      </div>
+
+      {/* Description */}
+      <div>
+        <textarea
+          value={slide.description}
+          onChange={(e) => updateSlide(i, "description", e.target.value)}
+          className={`w-full bg-transparent resize-none outline-none leading-relaxed text-sm ${t.desc}`}
+          rows={3}
+        />
+        {/* Footer */}
+       <div className="flex items-center gap-2 mt-4 pt-4 border-t border-white/10">
+  {userAvatar ? (
+    <img src={userAvatar} className="w-6 h-6 rounded-full object-cover" />
+  ) : (
+    <div className="w-6 h-6 rounded-full bg-purple-500 flex items-center justify-center text-xs font-bold text-white">
+      {userName[0]}
+    </div>
+  )}
+ <span className="text-xs text-white/40">{userName}</span>
+</div>
+
+{/* Watermark */}
+<div className="absolute bottom-3 right-4 text-[10px] text-white/20 font-medium tracking-widest uppercase">
+  Made with CarouselAI
+</div>
+      </div>
+    </div>
+  </div>
+))}
+            
           </div>
 
           {/* Export buttons */}
