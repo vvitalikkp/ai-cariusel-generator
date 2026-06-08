@@ -1,17 +1,32 @@
 import { NextResponse } from "next/server"
 import OpenAI from "openai"
+import { supabase } from "@/lib/supabase"
+
+const FREE_LIMIT = 5
 
 export async function POST(req: Request) {
   try {
     const apiKey = process.env.OPENAI_API_KEY
-    
+
     if (!apiKey) {
       return NextResponse.json({ error: "No API key" }, { status: 500 })
     }
 
     const openai = new OpenAI({ apiKey })
     const body = await req.json()
-    const { idea, style } = body
+    const { idea, style, email } = body
+
+    if (email) {
+      const { data: row } = await supabase
+        .from("generation_counts")
+        .select("count")
+        .eq("email", email)
+        .single()
+
+      if (row && row.count >= FREE_LIMIT) {
+        return NextResponse.json({ error: "limit_reached" })
+      }
+    }
 
     const response = await openai.chat.completions.create({
       model: "gpt-4o-mini",
@@ -40,7 +55,11 @@ Return ONLY the JSON array, no markdown, no extra text.`,
     const text = response.choices[0].message.content || "[]"
     const clean = text.replace(/```json|```/g, "").trim()
     const slides = JSON.parse(clean)
-    
+
+    if (email) {
+      await supabase.rpc("increment_generation_count", { user_email: email })
+    }
+
     return NextResponse.json({ slides })
   } catch (e) {
     console.error(e)
