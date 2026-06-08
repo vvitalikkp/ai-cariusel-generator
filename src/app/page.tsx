@@ -100,6 +100,11 @@ export default function Home() {
         body: JSON.stringify({ idea, style, email: session?.user?.email }),
       });
       const data = await res.json();
+      if (data.error === "limit_reached") {
+  alert("You've used your 5 free generations. Upgrade to Pro for unlimited access!");
+  setLoading(false);
+  return;
+}
       setSlides(data.slides || []);
     } catch (e) {
       console.error(e);
