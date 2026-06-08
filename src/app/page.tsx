@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useSession } from "next-auth/react";
 import { toPng } from "html-to-image";
 import JSZip from "jszip";
 import { saveAs } from "file-saver";
@@ -86,6 +87,7 @@ export default function Home() {
   const [userName, setUserName] = useState("CarouselAI")
   const [userAvatar, setUserAvatar] = useState<string | null>(null)
   const t = TEMPLATES[style];
+  const { data: session } = useSession();
 
   async function generateSlides() {
     if (!idea.trim()) return;
@@ -95,7 +97,7 @@ export default function Home() {
       const res = await fetch("/api/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ idea, style }),
+        body: JSON.stringify({ idea, style, email: session?.user?.email }),
       });
       const data = await res.json();
       setSlides(data.slides || []);
