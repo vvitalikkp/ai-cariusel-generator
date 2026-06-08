@@ -86,6 +86,7 @@ export default function Home() {
   const [cardFont, setCardFont] = useState("font-sans")
   const [userName, setUserName] = useState("CarouselAI")
   const [userAvatar, setUserAvatar] = useState<string | null>(null)
+  const [showPaywall, setShowPaywall] = useState(false)
   const t = TEMPLATES[style];
   const { data: session } = useSession();
 
@@ -100,8 +101,8 @@ export default function Home() {
         body: JSON.stringify({ idea, style, email: session?.user?.email }),
       });
       const data = await res.json();
-      if (data.error === "limit_reached") {
-  alert("You've used your 5 free generations. Upgrade to Pro for unlimited access!");
+    if (data.error === "limit_reached") {
+  setShowPaywall(true);
   setLoading(false);
   return;
 }
@@ -162,7 +163,15 @@ export default function Home() {
     }
     setLoadingPost(false)
   }
-
+async function handleUpgrade() {
+  const res = await fetch("/api/checkout", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email: session?.user?.email }),
+  })
+  const data = await res.json()
+  if (data.url) window.location.href = data.url
+}
   async function downloadPNG() {
     const zip = new JSZip();
     for (let i = 0; i < slides.length; i++) {
@@ -587,7 +596,21 @@ export default function Home() {
           </div>
         </div>
       </section>
-
+{showPaywall && (
+  <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center">
+    <div className="bg-zinc-900 border border-purple-500/30 rounded-[32px] p-10 max-w-md text-center">
+      <div className="text-5xl mb-4">🚀</div>
+      <h2 className="text-3xl font-black mb-3">You've used 5 free generations</h2>
+      <p className="text-zinc-400 mb-8">Upgrade to Pro for unlimited carousels, all templates, and PDF export.</p>
+      <button onClick={handleUpgrade} className="w-full py-4 rounded-2xl bg-fuchsia-500 hover:bg-fuchsia-400 transition font-bold text-lg mb-3">
+        Upgrade to Pro — $19
+      </button>
+      <button onClick={() => setShowPaywall(false)} className="text-zinc-500 text-sm hover:text-white transition">
+        Maybe later
+      </button>
+    </div>
+  </div>
+)}
     </main>
   );
 }
