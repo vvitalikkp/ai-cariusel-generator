@@ -33,19 +33,19 @@ export async function POST(req: Request) {
       messages: [
         {
           role: "user",
-          content: `Create a LinkedIn carousel about: ${idea}. Style: ${style}. 
+          content: `Create a LinkedIn carousel about: ${idea}. Style: ${style}.
 Return ONLY a valid JSON array of exactly 6 slides. Each slide must have:
-- "description": 2-3 sentences, maximum 120 characters total. Be specific and punchy.
-
+- "title": a short, bold headline (5-10 words max). Punchy and attention-grabbing.
+- "description": 3-4 full sentences (150-250 characters). Be specific, practical, and valuable. Give real insight, not fluff.
 - "type": one of [hook, problem, mistake, solution, framework, cta]
 
 Slide structure:
-1. Hook - grab attention with bold claim
-2. Problem - pain point people relate to
-3. Mistake - common mistake people make
-4. Solution - the key insight
-5. Framework - actionable steps
-6. CTA - call to action
+1. Hook - bold claim that grabs attention and promises value
+2. Problem - specific pain point your audience feels every day
+3. Mistake - the most common mistake people make and why it hurts them
+4. Solution - the key insight or mindset shift that changes everything
+5. Framework - 3 actionable steps anyone can apply today
+6. CTA - compelling call to action with clear next step
 
 Return ONLY the JSON array, no markdown, no extra text.`,
         }
