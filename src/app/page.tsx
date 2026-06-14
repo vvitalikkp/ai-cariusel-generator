@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { toPng } from "html-to-image";
 import JSZip from "jszip";
@@ -87,8 +87,27 @@ export default function Home() {
   const [userName, setUserName] = useState("CarouselAI")
   const [userAvatar, setUserAvatar] = useState<string | null>(null)
   const [showPaywall, setShowPaywall] = useState(false)
+  const [isPro, setIsPro] = useState(false)
   const t = TEMPLATES[style];
   const { data: session } = useSession();
+
+  useEffect(() => {
+    async function checkPro() {
+      if (!session?.user?.email) return
+      try {
+        const res = await fetch("/api/check-pro", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: session.user.email }),
+        })
+        const data = await res.json()
+        setIsPro(data.isPro || false)
+      } catch (e) {
+        console.error(e)
+      }
+    }
+    checkPro()
+  }, [session])
 
   async function generateSlides() {
     if (!idea.trim()) return;
@@ -188,6 +207,10 @@ export default function Home() {
   }
 
   async function downloadPDF() {
+    if (!isPro) {
+      setShowPaywall(true);
+      return;
+    }
     const firstEl = document.getElementById(`slide-0`);
     if (!firstEl) return;
     const w = firstEl.offsetWidth;
@@ -221,6 +244,7 @@ export default function Home() {
           <button className="hover:text-white transition">Features</button>
           <button className="hover:text-white transition">Pricing</button>
           <button className="hover:text-white transition">Github</button>
+          {isPro && <span className="px-3 py-1 rounded-full bg-fuchsia-500/20 border border-fuchsia-500/40 text-fuchsia-300 text-xs font-bold">PRO</span>}
           <SignInButton />
         </div>
       </nav>
@@ -361,7 +385,7 @@ export default function Home() {
                     : `linear-gradient(135deg, #0f0f1a 0%, ${cardColor}44 50%, #0f0f1a 100%)`,
                 }}
               >
-                <div className="relative z-10 flex flex-col justify-between h-full p-8">
+                <div className="relative z-10 flex flex-col h-full p-8">
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-bold tracking-[0.3em] uppercase text-purple-400">
                       {String(i + 1).padStart(2, "0")} / {slides.length.toString().padStart(2, "0")}
@@ -369,27 +393,22 @@ export default function Home() {
                     <div className={`w-2.5 h-2.5 rounded-full ${t.dot}`} />
                   </div>
 
-                  <div className="flex-1 flex items-center py-6">
+                  <div className="flex-1 flex flex-col justify-center gap-5 py-8">
                     <textarea
                       value={slide.title}
                       onChange={(e) => updateSlide(i, "title", e.target.value)}
-                      className={`w-full bg-transparent resize-none outline-none leading-tight text-3xl font-black ${t.title}`}
+                      className={`w-full bg-transparent resize-none outline-none leading-tight ${t.title}`}
                       rows={3}
+                    />
+                    <textarea
+                      value={slide.description}
+                      onChange={(e) => updateSlide(i, "description", e.target.value)}
+                      className={`w-full bg-transparent resize-none outline-none leading-relaxed text-base ${t.desc}`}
+                      rows={4}
                     />
                   </div>
 
-                  <p className={`leading-relaxed text-sm ${t.desc}`}>
-                    {slide.description}
-                  </p>
-
-                  <button
-                    onClick={() => regenerateSlide(i)}
-                    className="absolute top-3 left-1/2 -translate-x-1/2 text-[10px] text-white/40 hover:text-white transition bg-white/5 hover:bg-white/10 px-3 py-1 rounded-full border border-white/10"
-                  >
-                    regenerate
-                  </button>
-
-                  <div className="flex items-center gap-2 mt-4 pt-4 border-t border-white/10">
+                  <div className="flex items-center gap-2 pt-4 border-t border-white/10">
                     {userAvatar ? (
                       <img src={userAvatar} className="w-6 h-6 rounded-full object-cover" />
                     ) : (
@@ -398,11 +417,15 @@ export default function Home() {
                       </div>
                     )}
                     <span className="text-xs text-white/40">{userName}</span>
+                    <span className="ml-auto text-[10px] text-white/20 font-medium tracking-widest uppercase">CarouselAI</span>
                   </div>
 
-                  <div className="absolute bottom-3 right-4 text-[10px] text-white/20 font-medium tracking-widest uppercase">
-                    Made with CarouselAI
-                  </div>
+                  <button
+                    onClick={() => regenerateSlide(i)}
+                    className="absolute top-3 left-1/2 -translate-x-1/2 text-[10px] text-white/40 hover:text-white transition bg-white/5 hover:bg-white/10 px-3 py-1 rounded-full border border-white/10"
+                  >
+                    regenerate
+                  </button>
                 </div>
               </div>
             ))}
@@ -412,8 +435,12 @@ export default function Home() {
             <button onClick={downloadPNG} className="px-8 py-4 rounded-2xl bg-purple-600 hover:bg-purple-500 transition font-bold">
               Download PNG (ZIP)
             </button>
-            <button onClick={downloadPDF} className="px-8 py-4 rounded-2xl bg-fuchsia-600 hover:bg-fuchsia-500 transition font-bold">
-              Export PDF
+            <button
+              onClick={downloadPDF}
+              className={`px-8 py-4 rounded-2xl transition font-bold flex items-center gap-2 ${isPro ? "bg-fuchsia-600 hover:bg-fuchsia-500" : "bg-white/10 border border-white/10 hover:bg-white/20"}`}
+            >
+              {!isPro && <span className="text-yellow-400">🔒</span>}
+              Export PDF {!isPro && "(Pro)"}
             </button>
             <button
               onClick={() => {
@@ -515,41 +542,33 @@ export default function Home() {
           <h2 className="text-5xl font-black mb-4">Simple pricing<br />for creators</h2>
           <p className="text-zinc-400">Start free. Upgrade when you scale.</p>
         </div>
-        <div className="grid md:grid-cols-3 gap-8">
+        <div className="grid md:grid-cols-2 gap-8 max-w-3xl mx-auto">
           <div className="bg-white/5 border border-white/10 rounded-[32px] p-8 backdrop-blur-xl">
             <h3 className="text-2xl font-bold mb-4">Free</h3>
             <p className="text-5xl font-black mb-6">$0</p>
             <ul className="space-y-3 text-zinc-300 mb-8">
-              <li>5 carousels/day</li>
-              <li>Basic templates</li>
-              <li>PNG export</li>
+              <li>✓ 5 carousels total</li>
+              <li>✓ All templates</li>
+              <li>✓ PNG export</li>
+              <li className="text-zinc-600">✗ PDF export</li>
+              <li className="text-zinc-600">✗ Unlimited generations</li>
             </ul>
             <button className="w-full py-4 rounded-2xl bg-white/10 hover:bg-white/20 transition">Start Free</button>
           </div>
-          <div className="bg-gradient-to-br from-fuchsia-600/30 to-purple-600/20 border border-fuchsia-500/40 rounded-[32px] p-8 scale-105 shadow-[0_0_60px_rgba(217,70,239,0.25)]">
+          <div className="bg-gradient-to-br from-fuchsia-600/30 to-purple-600/20 border border-fuchsia-500/40 rounded-[32px] p-8 shadow-[0_0_60px_rgba(217,70,239,0.25)]">
             <p className="text-pink-300 mb-3 text-sm font-bold uppercase tracking-widest">Most Popular</p>
             <h3 className="text-2xl font-bold mb-4">Pro</h3>
             <p className="text-5xl font-black mb-6">$19</p>
             <ul className="space-y-3 text-zinc-200 mb-8">
-              <li>Unlimited carousels</li>
-              <li>AI storytelling</li>
-              <li>PDF export</li>
-              <li>Viral hooks</li>
+              <li>✓ Unlimited carousels</li>
+              <li>✓ All templates</li>
+              <li>✓ PNG export</li>
+              <li>✓ PDF export</li>
+              <li>✓ LinkedIn Post generator</li>
             </ul>
-            <button onClick={() => setShowPaywall(true)} className="w-full py-4 rounded-2xl bg-fuchsia-500 hover:bg-fuchsia-400 transition font-bold shadow-[0_0_30px_rgba(217,70,239,0.4)]">
-              Go Pro
+            <button onClick={handleUpgrade} className="w-full py-4 rounded-2xl bg-fuchsia-500 hover:bg-fuchsia-400 transition font-bold shadow-[0_0_30px_rgba(217,70,239,0.4)]">
+              Go Pro — $19
             </button>
-          </div>
-          <div className="bg-white/5 border border-white/10 rounded-[32px] p-8 backdrop-blur-xl">
-            <h3 className="text-2xl font-bold mb-4">Agency</h3>
-            <p className="text-5xl font-black mb-6">$99</p>
-            <ul className="space-y-3 text-zinc-300 mb-8">
-              <li>Team access</li>
-              <li>Brand templates</li>
-              <li>Priority support</li>
-              <li>Unlimited exports</li>
-            </ul>
-            <button className="w-full py-4 rounded-2xl bg-white/10 hover:bg-white/20 transition">Contact Sales</button>
           </div>
         </div>
       </section>
@@ -558,8 +577,8 @@ export default function Home() {
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center">
           <div className="bg-zinc-900 border border-purple-500/30 rounded-[32px] p-10 max-w-md text-center mx-4">
             <div className="text-5xl mb-4">🚀</div>
-            <h2 className="text-3xl font-black mb-3">You've used 5 free generations</h2>
-            <p className="text-zinc-400 mb-8">Upgrade to Pro for unlimited carousels, all templates, and PDF export.</p>
+            <h2 className="text-3xl font-black mb-3">Upgrade to Pro</h2>
+            <p className="text-zinc-400 mb-8">Get unlimited carousels and PDF export for just $19 one-time payment.</p>
             <button onClick={handleUpgrade} className="w-full py-4 rounded-2xl bg-fuchsia-500 hover:bg-fuchsia-400 transition font-bold text-lg mb-3">
               Upgrade to Pro — $19
             </button>
