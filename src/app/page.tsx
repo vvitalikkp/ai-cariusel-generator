@@ -88,8 +88,17 @@ export default function Home() {
   const [userAvatar, setUserAvatar] = useState<string | null>(null)
   const [showPaywall, setShowPaywall] = useState(false)
   const [isPro, setIsPro] = useState(false)
+  const [showSuccess, setShowSuccess] = useState(false)
   const t = TEMPLATES[style];
   const { data: session } = useSession();
+
+useEffect(() => {
+  const params = new URLSearchParams(window.location.search)
+  if (params.get("success") === "true") {
+    setShowSuccess(true)
+    window.history.replaceState({}, "", "/")
+  }
+}, [])
 
   useEffect(() => {
     async function checkPro() {
@@ -620,6 +629,19 @@ export default function Home() {
           🔒 Secure payment via Stripe · 30-day money-back guarantee
         </p>
       </section>
+
+{showSuccess && (
+  <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center">
+    <div className="bg-zinc-900 border border-green-500/30 rounded-[32px] p-10 max-w-md text-center mx-4">
+      <div className="text-5xl mb-4">🎉</div>
+      <h2 className="text-3xl font-black mb-3">Welcome to Pro!</h2>
+      <p className="text-zinc-400 mb-8">Your account has been upgraded. Enjoy unlimited carousels and PDF export!</p>
+      <button onClick={() => { setShowSuccess(false); window.location.reload(); }} className="w-full py-4 rounded-2xl bg-green-500 hover:bg-green-400 transition font-bold text-lg">
+        Start Creating 🚀
+      </button>
+    </div>
+  </div>
+)}
 
       {showPaywall && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center">
