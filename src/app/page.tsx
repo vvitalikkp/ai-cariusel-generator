@@ -536,41 +536,82 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="relative z-10 max-w-6xl mx-auto py-32 px-6">
+     <section className="relative z-10 max-w-6xl mx-auto py-32 px-6">
         <div className="text-center mb-16">
           <p className="text-pink-400 uppercase tracking-[0.3em] text-sm mb-4">Pricing</p>
-          <h2 className="text-5xl font-black mb-4">Simple pricing<br />for creators</h2>
-          <p className="text-zinc-400">Start free. Upgrade when you scale.</p>
+          <h2 className="text-5xl font-black mb-4">Pay once.<br />Use forever.</h2>
+          <p className="text-zinc-400">No subscriptions. No hidden fees. Upgrade when you're ready.</p>
         </div>
-        <div className="grid md:grid-cols-2 gap-8 max-w-3xl mx-auto">
-          <div className="bg-white/5 border border-white/10 rounded-[32px] p-8 backdrop-blur-xl">
-            <h3 className="text-2xl font-bold mb-4">Free</h3>
-            <p className="text-5xl font-black mb-6">$0</p>
-            <ul className="space-y-3 text-zinc-300 mb-8">
-              <li>✓ 5 carousels total</li>
-              <li>✓ All templates</li>
-              <li>✓ PNG export</li>
-              <li className="text-zinc-600">✗ PDF export</li>
-              <li className="text-zinc-600">✗ Unlimited generations</li>
+        <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+
+          {/* FREE */}
+          <div className="bg-white/5 border border-white/10 rounded-[32px] p-8 backdrop-blur-xl flex flex-col">
+            <h3 className="text-xl font-bold mb-2">Free</h3>
+            <p className="text-zinc-500 text-sm mb-6">Try before you buy</p>
+            <p className="text-5xl font-black mb-1">$0</p>
+            <p className="text-zinc-600 text-sm mb-8">forever</p>
+            <ul className="space-y-3 text-zinc-300 mb-8 flex-1">
+              <li className="flex items-center gap-2"><span className="text-green-400">✓</span> 3 carousels total</li>
+              <li className="flex items-center gap-2"><span className="text-green-400">✓</span> PNG export</li>
+              <li className="flex items-center gap-2"><span className="text-green-400">✓</span> Basic templates</li>
+              <li className="flex items-center gap-2 text-zinc-600"><span>✗</span> PDF export</li>
+              <li className="flex items-center gap-2 text-zinc-600"><span>✗</span> LinkedIn Post generator</li>
+              <li className="flex items-center gap-2 text-zinc-600"><span>✗</span> Watermark removal</li>
             </ul>
-            <button className="w-full py-4 rounded-2xl bg-white/10 hover:bg-white/20 transition">Start Free</button>
-          </div>
-          <div className="bg-gradient-to-br from-fuchsia-600/30 to-purple-600/20 border border-fuchsia-500/40 rounded-[32px] p-8 shadow-[0_0_60px_rgba(217,70,239,0.25)]">
-            <p className="text-pink-300 mb-3 text-sm font-bold uppercase tracking-widest">Most Popular</p>
-            <h3 className="text-2xl font-bold mb-4">Pro</h3>
-            <p className="text-5xl font-black mb-6">$19</p>
-            <ul className="space-y-3 text-zinc-200 mb-8">
-              <li>✓ Unlimited carousels</li>
-              <li>✓ All templates</li>
-              <li>✓ PNG export</li>
-              <li>✓ PDF export</li>
-              <li>✓ LinkedIn Post generator</li>
-            </ul>
-            <button onClick={handleUpgrade} className="w-full py-4 rounded-2xl bg-fuchsia-500 hover:bg-fuchsia-400 transition font-bold shadow-[0_0_30px_rgba(217,70,239,0.4)]">
-              Go Pro — $19
+            <button className="w-full py-4 rounded-2xl bg-white/10 hover:bg-white/20 transition font-bold">
+              Start Free
             </button>
           </div>
+
+          {/* PRO - one-time */}
+          <div className="relative bg-gradient-to-br from-fuchsia-600/30 to-purple-600/20 border border-fuchsia-500/40 rounded-[32px] p-8 shadow-[0_0_60px_rgba(217,70,239,0.25)] flex flex-col">
+            <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-fuchsia-500 text-white text-xs font-black px-4 py-1.5 rounded-full uppercase tracking-widest whitespace-nowrap">
+              BEST VALUE
+            </div>
+            <h3 className="text-xl font-bold mb-2">Pro</h3>
+            <p className="text-zinc-400 text-sm mb-6">One-time payment</p>
+            <p className="text-5xl font-black mb-1">$49</p>
+            <p className="text-zinc-400 text-sm mb-8">pay once, yours forever</p>
+            <ul className="space-y-3 text-zinc-200 mb-8 flex-1">
+              <li className="flex items-center gap-2"><span className="text-green-400">✓</span> 50 carousels</li>
+              <li className="flex items-center gap-2"><span className="text-green-400">✓</span> PNG + PDF export</li>
+              <li className="flex items-center gap-2"><span className="text-green-400">✓</span> All templates</li>
+              <li className="flex items-center gap-2"><span className="text-green-400">✓</span> LinkedIn Post generator</li>
+              <li className="flex items-center gap-2"><span className="text-green-400">✓</span> No watermark</li>
+              <li className="flex items-center gap-2 text-zinc-600"><span>✗</span> Priority support</li>
+            </ul>
+            <button onClick={handleUpgrade} className="w-full py-4 rounded-2xl bg-fuchsia-500 hover:bg-fuchsia-400 transition font-bold shadow-[0_0_30px_rgba(217,70,239,0.4)]">
+              Get Pro — $49
+            </button>
+          </div>
+
+          {/* PRO+ - subscription */}
+          <div className="bg-white/5 border border-purple-500/30 rounded-[32px] p-8 backdrop-blur-xl flex flex-col">
+            <h3 className="text-xl font-bold mb-2">Pro+</h3>
+            <p className="text-zinc-500 text-sm mb-6">For power users</p>
+            <div className="flex items-end gap-1 mb-1">
+              <p className="text-5xl font-black">$19</p>
+              <p className="text-zinc-400 text-sm mb-2">/month</p>
+            </div>
+            <p className="text-zinc-600 text-sm mb-8">cancel anytime</p>
+            <ul className="space-y-3 text-zinc-300 mb-8 flex-1">
+              <li className="flex items-center gap-2"><span className="text-green-400">✓</span> Unlimited carousels</li>
+              <li className="flex items-center gap-2"><span className="text-green-400">✓</span> PNG + PDF export</li>
+              <li className="flex items-center gap-2"><span className="text-green-400">✓</span> All templates</li>
+              <li className="flex items-center gap-2"><span className="text-green-400">✓</span> LinkedIn Post generator</li>
+              <li className="flex items-center gap-2"><span className="text-green-400">✓</span> No watermark</li>
+              <li className="flex items-center gap-2"><span className="text-green-400">✓</span> Priority support</li>
+            </ul>
+            <button onClick={handleUpgrade} className="w-full py-4 rounded-2xl bg-purple-600 hover:bg-purple-500 transition font-bold">
+              Get Pro+ — $19/mo
+            </button>
+          </div>
+
         </div>
+
+        <p className="text-center text-zinc-600 text-sm mt-10">
+          🔒 Secure payment via Stripe · 30-day money-back guarantee
+        </p>
       </section>
 
       {showPaywall && (
@@ -578,9 +619,9 @@ export default function Home() {
           <div className="bg-zinc-900 border border-purple-500/30 rounded-[32px] p-10 max-w-md text-center mx-4">
             <div className="text-5xl mb-4">🚀</div>
             <h2 className="text-3xl font-black mb-3">Upgrade to Pro</h2>
-            <p className="text-zinc-400 mb-8">Get unlimited carousels and PDF export for just $19 one-time payment.</p>
+            <p className="text-zinc-400 mb-8">Get 50 carousels + PDF export for just $49 one-time, or go unlimited with Pro+ at $19/month.</p>
             <button onClick={handleUpgrade} className="w-full py-4 rounded-2xl bg-fuchsia-500 hover:bg-fuchsia-400 transition font-bold text-lg mb-3">
-              Upgrade to Pro — $19
+              Upgrade to Pro — $49
             </button>
             <button onClick={() => setShowPaywall(false)} className="text-zinc-500 text-sm hover:text-white transition">
               Maybe later
