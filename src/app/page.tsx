@@ -183,7 +183,11 @@ export default function Home() {
     setLoadingPost(false)
   }
 
-  async function handleUpgrade(plan: "pro" | "pro_plus" = "pro") {
+ async function handleUpgrade(plan: "pro" | "pro_plus" = "pro") {
+  if (!session?.user?.email) {
+    alert("Please sign in first to upgrade")
+    return
+  }
   const res = await fetch("/api/checkout", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -191,7 +195,9 @@ export default function Home() {
   })
   const data = await res.json()
   if (data.url) window.location.href = data.url
+  else alert("Error: " + JSON.stringify(data))
 }
+
 
 
   async function downloadPNG() {
