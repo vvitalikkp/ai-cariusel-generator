@@ -581,7 +581,7 @@ export default function Home() {
               <li className="flex items-center gap-2"><span className="text-green-400">✓</span> No watermark</li>
               <li className="flex items-center gap-2 text-zinc-600"><span>✗</span> Priority support</li>
             </ul>
-            <button onClick={handleUpgrade} className="w-full py-4 rounded-2xl bg-fuchsia-500 hover:bg-fuchsia-400 transition font-bold shadow-[0_0_30px_rgba(217,70,239,0.4)]">
+            <button onClick={() => handleUpgrade("pro")} className="w-full py-4 rounded-2xl bg-fuchsia-500 hover:bg-fuchsia-400 transition font-bold shadow-[0_0_30px_rgba(217,70,239,0.4)]">
               Get Pro — $49
             </button>
           </div>
@@ -603,7 +603,7 @@ export default function Home() {
               <li className="flex items-center gap-2"><span className="text-green-400">✓</span> No watermark</li>
               <li className="flex items-center gap-2"><span className="text-green-400">✓</span> Priority support</li>
             </ul>
-            <button onClick={handleUpgrade} className="w-full py-4 rounded-2xl bg-purple-600 hover:bg-purple-500 transition font-bold">
+            <button onClick={() => handleUpgrade("pro_plus")} className="w-full py-4 rounded-2xl bg-purple-600 hover:bg-purple-500 transition font-bold">
               Get Pro+ — $19/mo
             </button>
           </div>
@@ -621,7 +621,7 @@ export default function Home() {
             <div className="text-5xl mb-4">🚀</div>
             <h2 className="text-3xl font-black mb-3">Upgrade to Pro</h2>
             <p className="text-zinc-400 mb-8">Get 50 carousels + PDF export for just $49 one-time, or go unlimited with Pro+ at $19/month.</p>
-            <button onClick={handleUpgrade} className="w-full py-4 rounded-2xl bg-fuchsia-500 hover:bg-fuchsia-400 transition font-bold text-lg mb-3">
+            <button onClick={() => handleUpgrade("pro")} className="w-full py-4 rounded-2xl bg-fuchsia-500 hover:bg-fuchsia-400 transition font-bold text-lg mb-3">
               Upgrade to Pro — $49
             </button>
             <button onClick={() => setShowPaywall(false)} className="text-zinc-500 text-sm hover:text-white transition">
