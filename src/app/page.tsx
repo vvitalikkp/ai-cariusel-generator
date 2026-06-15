@@ -277,7 +277,7 @@ useEffect(() => {
             <p className="text-zinc-400 text-xl mb-4 max-w-xl">
               Generate beautiful carousel posts, hooks, and viral content in seconds.
             </p>
-            <p className="text-sm text-zinc-500">Trusted by 2,000+ creators & marketers</p>
+            <p className="text-sm text-zinc-500">Start creating viral LinkedIn content today</p>
           </div>
 
           <div className="flex flex-col gap-4">
@@ -543,7 +543,7 @@ useEffect(() => {
             </div>
           </div>
           <div className="bg-white/5 border border-white/10 rounded-[24px] p-6">
-            <p className="text-zinc-300 text-sm mb-6">"My engagement went up 3x after I started using AI carousels. Best $19 I ever spent."</p>
+            <p className="text-zinc-300 text-sm mb-6">"My engagement went up 3x after I started using AI carousels. Best $49 I ever spent."</p>
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-cyan-600 flex items-center justify-center font-bold">D</div>
               <div><p className="font-bold text-sm">David N.</p><p className="text-zinc-500 text-xs">Marketing Director</p></div>
