@@ -183,15 +183,16 @@ export default function Home() {
     setLoadingPost(false)
   }
 
-  async function handleUpgrade() {
-    const res = await fetch("/api/checkout", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email: session?.user?.email }),
-    })
-    const data = await res.json()
-    if (data.url) window.location.href = data.url
-  }
+  async function handleUpgrade(plan: "pro" | "pro_plus" = "pro") {
+  const res = await fetch("/api/checkout", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email: session?.user?.email, plan }),
+  })
+  const data = await res.json()
+  if (data.url) window.location.href = data.url
+}
+
 
   async function downloadPNG() {
     const zip = new JSZip();
