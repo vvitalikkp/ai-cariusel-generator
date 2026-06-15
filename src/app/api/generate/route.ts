@@ -3,6 +3,7 @@ import OpenAI from "openai"
 import { supabase } from "@/lib/supabase"
 
 const FREE_LIMIT = 3
+const PRO_LIMIT = 50
 
 export async function POST(req: Request) {
   try {
@@ -19,16 +20,23 @@ export async function POST(req: Request) {
     if (email) {
       const { data: row } = await supabase
         .from("generation_counts")
-        .select("count, is_pro")
+        .select("count, is_pro, plan")
         .eq("email", email)
         .single()
 
       const isPro = row?.is_pro || false
+      const plan = row?.plan || "free"
       const count = row?.count || 0
 
       if (!isPro && count >= FREE_LIMIT) {
         return NextResponse.json({ error: "limit_reached" })
       }
+
+      if (isPro && plan === "pro" && count >= PRO_LIMIT) {
+        return NextResponse.json({ error: "limit_reached" })
+      }
+
+      // pro_plus — unlimited, no check
     }
 
     const response = await openai.chat.completions.create({
