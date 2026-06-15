@@ -2,7 +2,7 @@ import { NextResponse } from "next/server"
 import OpenAI from "openai"
 import { supabase } from "@/lib/supabase"
 
-const FREE_LIMIT = 5
+const FREE_LIMIT = 3
 
 export async function POST(req: Request) {
   try {
@@ -19,11 +19,14 @@ export async function POST(req: Request) {
     if (email) {
       const { data: row } = await supabase
         .from("generation_counts")
-        .select("count")
+        .select("count, is_pro")
         .eq("email", email)
         .single()
 
-      if (row && row.count >= FREE_LIMIT) {
+      const isPro = row?.is_pro || false
+      const count = row?.count || 0
+
+      if (!isPro && count >= FREE_LIMIT) {
         return NextResponse.json({ error: "limit_reached" })
       }
     }
