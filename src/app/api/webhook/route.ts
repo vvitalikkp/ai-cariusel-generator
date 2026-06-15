@@ -20,11 +20,12 @@ export async function POST(req: Request) {
   if (event.type === "checkout.session.completed") {
     const session = event.data.object as Stripe.Checkout.Session
     const email = session.customer_email
+    const plan = session.mode === "subscription" ? "pro_plus" : "pro"
 
     if (email) {
       await supabase
         .from("generation_counts")
-        .upsert({ email, is_pro: true }, { onConflict: "email" })
+        .upsert({ email, is_pro: true, plan }, { onConflict: "email" })
     }
   }
 
