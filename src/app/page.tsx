@@ -232,29 +232,22 @@ useEffect(() => {
     unit: "px",
     format: [1080, 1350],
   });
+  
+  const btns = document.querySelectorAll("[data-pdf-hide]") as NodeListOf<HTMLElement>;
+  btns.forEach(b => b.style.visibility = "hidden");
+  
   for (let i = 0; i < slides.length; i++) {
     const el = document.getElementById(`slide-${i}`);
     if (!el) continue;
-    
-    // скрываем кнопку regenerate
-    const btn = el.querySelector("button") as HTMLElement;
-    if (btn) btn.style.display = "none";
-    
-    const dataUrl = await toPng(el, { 
-      pixelRatio: 2, 
-      backgroundColor: "#000000",
-      width: el.offsetWidth,
-      height: el.offsetHeight
-    });
-    
-    // возвращаем кнопку
-    if (btn) btn.style.display = "";
-    
+    const dataUrl = await toPng(el, { pixelRatio: 2, backgroundColor: "#000000" });
     if (i > 0) pdf.addPage();
     pdf.addImage(dataUrl, "PNG", 0, 0, 1080, 1350);
   }
+  
+  btns.forEach(b => b.style.visibility = "");
   pdf.save("carousel.pdf");
 }
+
  
 
   return (
@@ -448,7 +441,8 @@ useEffect(() => {
                   </div>
 
                   <button
-                    onClick={() => regenerateSlide(i)}
+    data-pdf-hide
+    onClick={() => regenerateSlide(i)}
                     className="absolute top-3 left-1/2 -translate-x-1/2 text-[10px] text-white/40 hover:text-white transition bg-white/5 hover:bg-white/10 px-3 py-1 rounded-full border border-white/10"
                   >
                     regenerate
