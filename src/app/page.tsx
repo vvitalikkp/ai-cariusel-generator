@@ -222,7 +222,7 @@ useEffect(() => {
     saveAs(content, "carousel.zip");
   }
 
-   async function downloadPDF() {
+  async function downloadPDF() {
   if (!isPro) {
     setShowPaywall(true);
     return;
@@ -235,11 +235,26 @@ useEffect(() => {
   for (let i = 0; i < slides.length; i++) {
     const el = document.getElementById(`slide-${i}`);
     if (!el) continue;
-    const dataUrl = await toPng(el, { pixelRatio: 2, backgroundColor: "#000000", width: 1080, height: 1350 });
+    
+    // скрываем кнопку regenerate
+    const btn = el.querySelector("button") as HTMLElement;
+    if (btn) btn.style.display = "none";
+    
+    const dataUrl = await toPng(el, { 
+      pixelRatio: 2, 
+      backgroundColor: "#000000",
+      width: el.offsetWidth,
+      height: el.offsetHeight
+    });
+    
+    // возвращаем кнопку
+    if (btn) btn.style.display = "";
+    
     if (i > 0) pdf.addPage();
     pdf.addImage(dataUrl, "PNG", 0, 0, 1080, 1350);
   }
   pdf.save("carousel.pdf");
+}
  }
 
   return (
