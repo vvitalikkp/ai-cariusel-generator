@@ -255,7 +255,7 @@ useEffect(() => {
   }
   pdf.save("carousel.pdf");
 }
- }
+ 
 
   return (
     <main className="min-h-screen bg-black text-white overflow-x-hidden relative">
