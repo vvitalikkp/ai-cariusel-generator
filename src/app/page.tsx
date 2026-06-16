@@ -233,7 +233,7 @@ export default function Home() {
     });
 
     const btns = document.querySelectorAll("[data-pdf-hide]") as NodeListOf<HTMLElement>;
-    btns.forEach(b => b.style.visibility = "hidden");
+    btns.forEach(b => b.style.display = "none");
 
     for (let i = 0; i < slides.length; i++) {
       const el = document.getElementById(`slide-${i}`);
@@ -247,7 +247,10 @@ export default function Home() {
       el.style.width = "1080px";
       el.style.height = "1350px";
       el.style.aspectRatio = "unset";
-      el.style.position = "absolute";
+     el.style.position = "fixed";
+el.style.top = "0";
+el.style.left = "0";
+el.style.zIndex = "-9999";;
 
       await new Promise(r => setTimeout(r, 100));
 
@@ -267,7 +270,7 @@ export default function Home() {
       pdf.addImage(dataUrl, "PNG", 0, 0, 1080, 1350);
     }
 
-    btns.forEach(b => b.style.visibility = "");
+    btns.forEach(b => b.style.display = "");
     pdf.save("carousel.pdf");
   }
 
