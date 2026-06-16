@@ -1,7 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useSession } from "next-auth/react";
+import { useState } from "react";
 import { toPng } from "html-to-image";
 import JSZip from "jszip";
 import { saveAs } from "file-saver";
@@ -86,37 +85,7 @@ export default function Home() {
   const [cardFont, setCardFont] = useState("font-sans")
   const [userName, setUserName] = useState("CarouselAI")
   const [userAvatar, setUserAvatar] = useState<string | null>(null)
-  const [showPaywall, setShowPaywall] = useState(false)
-  const [isPro, setIsPro] = useState(false)
-  const [showSuccess, setShowSuccess] = useState(false)
   const t = TEMPLATES[style];
-  const { data: session } = useSession();
-
-useEffect(() => {
-  const params = new URLSearchParams(window.location.search)
-  if (params.get("success") === "true") {
-    setShowSuccess(true)
-    window.history.replaceState({}, "", "/")
-  }
-}, [])
-
-  useEffect(() => {
-    async function checkPro() {
-      if (!session?.user?.email) return
-      try {
-        const res = await fetch("/api/check-pro", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email: session.user.email }),
-        })
-        const data = await res.json()
-        setIsPro(data.isPro || false)
-      } catch (e) {
-        console.error(e)
-      }
-    }
-    checkPro()
-  }, [session])
 
   async function generateSlides() {
     if (!idea.trim()) return;
@@ -126,14 +95,9 @@ useEffect(() => {
       const res = await fetch("/api/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ idea, style, email: session?.user?.email }),
+        body: JSON.stringify({ idea, style }),
       });
       const data = await res.json();
-      if (data.error === "limit_reached") {
-        setShowPaywall(true);
-        setLoading(false);
-        return;
-      }
       setSlides(data.slides || []);
     } catch (e) {
       console.error(e);
@@ -177,9 +141,9 @@ useEffect(() => {
       const res = await fetch("/api/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          idea: `Write a LinkedIn post (max 200 words) to introduce this carousel about: ${idea}. Slides: ${slidesText}. Include hook, value, and CTA. Add relevant emojis.`,
-          style
+        body: JSON.stringify({ 
+          idea: `Write a LinkedIn post (max 200 words) to introduce this carousel about: ${idea}. Slides: ${slidesText}. Include hook, value, and CTA. Add relevant emojis.`, 
+          style 
         }),
       })
       const data = await res.json()
@@ -191,23 +155,6 @@ useEffect(() => {
     }
     setLoadingPost(false)
   }
-
- async function handleUpgrade(plan: "pro" | "pro_plus" = "pro") {
-  if (!session?.user?.email) {
-    alert("Please sign in first to upgrade")
-    return
-  }
-  const res = await fetch("/api/checkout", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email: session?.user?.email, plan }),
-  })
-  const data = await res.json()
-  if (data.url) window.location.href = data.url
-  else alert("Error: " + JSON.stringify(data))
-}
-
-
 
   async function downloadPNG() {
     const zip = new JSZip();
@@ -223,54 +170,54 @@ useEffect(() => {
   }
 
   async function downloadPDF() {
-  if (!isPro) {
-    setShowPaywall(true);
-    return;
-  }
-  const pdf = new jsPDF({
-    orientation: "portrait",
-    unit: "px",
-    format: [1080, 1350],
-  });
-  
-  const btns = document.querySelectorAll("[data-pdf-hide]") as NodeListOf<HTMLElement>;
-  btns.forEach(b => b.style.visibility = "hidden");
-  
-  for (let i = 0; i < slides.length; i++) {
-    const el = document.getElementById(`slide-${i}`);
-    if (!el) continue;
-    const dataUrl = await toPng(el, { pixelRatio: 2, backgroundColor: "#000000" });
-    if (i > 0) pdf.addPage();
-    pdf.addImage(dataUrl, "PNG", 0, 0, 1080, 1350);
-  }
-  
-  btns.forEach(b => b.style.visibility = "");
-  pdf.save("carousel.pdf");
-}
+    const firstEl = document.getElementById(`slide-0`);
+    if (!firstEl) return;
+    
+    const w = firstEl.offsetWidth;
+    const h = firstEl.offsetHeight;
+    
+    const pdf = new jsPDF({
+      orientation: w > h ? "landscape" : "portrait",
+      unit: "px",
+      format: [w, h],
+    });
 
- 
+    for (let i = 0; i < slides.length; i++) {
+      const el = document.getElementById(`slide-${i}`);
+      if (!el) continue;
+      const dataUrl = await toPng(el, { pixelRatio: 2, backgroundColor: "#000000" });
+      if (i > 0) pdf.addPage();
+      pdf.addImage(dataUrl, "PNG", 0, 0, w, h);
+    }
+
+    pdf.save("carousel.pdf");
+  }
 
   return (
     <main className="min-h-screen bg-black text-white overflow-x-hidden relative">
 
+      {/* Background glows */}
       <div className="fixed inset-0 pointer-events-none">
         <div className="absolute top-[-200px] left-[-200px] w-[500px] h-[500px] bg-fuchsia-600/20 rounded-full blur-[140px]" />
         <div className="absolute bottom-[-200px] right-[-200px] w-[500px] h-[500px] bg-purple-700/20 rounded-full blur-[140px]" />
       </div>
 
+      {/* NAV */}
       <nav className="relative z-20 flex items-center justify-between px-8 py-6 max-w-7xl mx-auto">
         <div className="text-xl font-black tracking-tight">CarouselAI</div>
         <div className="flex items-center gap-8 text-sm text-zinc-400">
           <button className="hover:text-white transition">Features</button>
           <button className="hover:text-white transition">Pricing</button>
           <button className="hover:text-white transition">Github</button>
-          {isPro && <span className="px-3 py-1 rounded-full bg-fuchsia-500/20 border border-fuchsia-500/40 text-fuchsia-300 text-xs font-bold">PRO</span>}
           <SignInButton />
         </div>
       </nav>
 
+      {/* HERO */}
       <section className="relative z-10 max-w-7xl mx-auto px-6 pt-20 pb-32">
         <div className="grid lg:grid-cols-2 gap-16 items-start">
+
+          {/* Left */}
           <div>
             <div className="mb-6 inline-block px-5 py-2 rounded-full border border-white/10 bg-white/5 backdrop-blur-xl text-sm">
               AI-powered LinkedIn Growth
@@ -281,10 +228,12 @@ useEffect(() => {
             <p className="text-zinc-400 text-xl mb-4 max-w-xl">
               Generate beautiful carousel posts, hooks, and viral content in seconds.
             </p>
-            <p className="text-sm text-zinc-500">Start creating viral LinkedIn content today</p>
+            <p className="text-sm text-zinc-500">Trusted by 2,000+ creators & marketers</p>
           </div>
 
+          {/* Right — Input */}
           <div className="flex flex-col gap-4">
+            {/* Style selector */}
             <div className="flex gap-3 flex-wrap">
               {(Object.keys(TEMPLATES) as TemplateKey[]).map((item) => (
                 <button
@@ -301,6 +250,7 @@ useEffect(() => {
               ))}
             </div>
 
+            {/* Input + button */}
             <div className="flex gap-3">
               <textarea
                 placeholder="Paste your text, tweet, article or just an idea..."
@@ -327,11 +277,13 @@ useEffect(() => {
         </div>
       </section>
 
+      {/* SLIDES */}
       {slides.length > 0 && (
         <section className="relative z-10 max-w-2xl mx-auto px-6 pb-20">
           <h2 className="text-2xl font-black mb-8 text-center">
             Your carousel — <span className="text-purple-400">{slides.length} slides</span>
           </h2>
+          {/* Slide preview panel */}
           <div className="flex gap-2 justify-center mb-6 flex-wrap">
             {slides.map((_, i) => (
               <button
@@ -343,6 +295,7 @@ useEffect(() => {
               </button>
             ))}
           </div>
+          {/* Color & Font controls */}
           <div className="flex flex-wrap gap-4 justify-center mb-6">
             <div className="flex items-center gap-2">
               <span className="text-sm text-zinc-400">Color:</span>
@@ -377,7 +330,7 @@ useEffect(() => {
                 placeholder="Your name"
               />
               <label className="cursor-pointer text-sm text-zinc-400 hover:text-white transition">
-                Photo
+                📷 Photo
                 <input type="file" accept="image/*" className="hidden"
                   onChange={(e) => {
                     const file = e.target.files?.[0]
@@ -396,16 +349,18 @@ useEffect(() => {
               <div
                 key={i}
                 id={`slide-${i}`}
-                className="relative rounded-[28px] overflow-hidden"
+                className={`relative rounded-[28px] overflow-hidden group`}
                 style={{
                   width: "100%",
                   aspectRatio: "4/5",
-                  background: i % 2 === 0
+                  background: i % 2 === 0 
                     ? `linear-gradient(135deg, ${cardColor} 0%, ${cardColor}99 50%, ${cardColor} 100%)`
                     : `linear-gradient(135deg, #0f0f1a 0%, ${cardColor}44 50%, #0f0f1a 100%)`,
                 }}
               >
-                <div className="relative z-10 flex flex-col h-full p-8">
+                {/* Content */}
+                <div className="relative z-10 flex flex-col justify-between h-full p-8">
+                  {/* Top */}
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-bold tracking-[0.3em] uppercase text-purple-400">
                       {String(i + 1).padStart(2, "0")} / {slides.length.toString().padStart(2, "0")}
@@ -413,22 +368,39 @@ useEffect(() => {
                     <div className={`w-2.5 h-2.5 rounded-full ${t.dot}`} />
                   </div>
 
-                  <div className="flex-1 flex flex-col justify-center gap-5 py-8">
+                  {/* Title */}
+                  <div className="flex-1 flex items-center py-6">
                     <textarea
                       value={slide.title}
                       onChange={(e) => updateSlide(i, "title", e.target.value)}
-                      className={`w-full bg-transparent resize-none outline-none leading-tight ${t.title}`}
+                      className={`w-full bg-transparent resize-none outline-none leading-tight text-3xl font-black ${t.title}`}
                       rows={3}
-                    />
-                    <textarea
-                      value={slide.description}
-                      onChange={(e) => updateSlide(i, "description", e.target.value)}
-                      className={`w-full bg-transparent resize-none outline-none leading-relaxed text-base ${t.desc}`}
-                      rows={4}
                     />
                   </div>
 
-                  <div className="flex items-center gap-2 pt-4 border-t border-white/10">
+                  {/* Description */}
+                  <div>
+                    <textarea
+                      value={slide.description}
+                      onChange={(e) => updateSlide(i, "description", e.target.value)}
+                      className={`w-full bg-transparent resize-none outline-none leading-relaxed text-sm ${t.desc}`}
+                      rows={3}
+                    />
+                    <div className={`text-right text-[10px] mt-1 ${slide.description.length > 130 ? 'text-red-400' : 'text-white/20'}`}>
+                      {slide.description.length}/150
+                    </div>
+                  </div>
+
+                  {/* Regenerate button */}
+                  <button
+                    onClick={() => regenerateSlide(i)}
+                    className="absolute top-3 left-1/2 -translate-x-1/2 text-[10px] text-white/40 hover:text-white transition bg-white/5 hover:bg-white/10 px-3 py-1 rounded-full border border-white/10"
+                  >
+                    ↻ regenerate
+                  </button>
+
+                  {/* Footer */}
+                  <div className="flex items-center gap-2 mt-4 pt-4 border-t border-white/10">
                     {userAvatar ? (
                       <img src={userAvatar} className="w-6 h-6 rounded-full object-cover" />
                     ) : (
@@ -437,31 +409,30 @@ useEffect(() => {
                       </div>
                     )}
                     <span className="text-xs text-white/40">{userName}</span>
-                    <span className="ml-auto text-[10px] text-white/20 font-medium tracking-widest uppercase">CarouselAI</span>
                   </div>
 
-                  <button
-    data-pdf-hide
-    onClick={() => regenerateSlide(i)}
-                    className="absolute top-3 left-1/2 -translate-x-1/2 text-[10px] text-white/40 hover:text-white transition bg-white/5 hover:bg-white/10 px-3 py-1 rounded-full border border-white/10"
-                  >
-                    regenerate
-                  </button>
+                  {/* Watermark */}
+                  <div className="absolute bottom-3 right-4 text-[10px] text-white/20 font-medium tracking-widest uppercase">
+                    Made with CarouselAI
+                  </div>
                 </div>
               </div>
             ))}
           </div>
 
+          {/* Export buttons */}
           <div className="flex flex-col sm:flex-row gap-3 mt-10 justify-center">
-            <button onClick={downloadPNG} className="px-8 py-4 rounded-2xl bg-purple-600 hover:bg-purple-500 transition font-bold">
+            <button
+              onClick={downloadPNG}
+              className="px-8 py-4 rounded-2xl bg-purple-600 hover:bg-purple-500 transition font-bold"
+            >
               Download PNG (ZIP)
             </button>
             <button
               onClick={downloadPDF}
-              className={`px-8 py-4 rounded-2xl transition font-bold flex items-center gap-2 ${isPro ? "bg-fuchsia-600 hover:bg-fuchsia-500" : "bg-white/10 border border-white/10 hover:bg-white/20"}`}
+              className="px-8 py-4 rounded-2xl bg-fuchsia-600 hover:bg-fuchsia-500 transition font-bold"
             >
-              {!isPro && <span className="text-yellow-400">🔒</span>}
-              Export PDF {!isPro && "(Pro)"}
+              Export PDF
             </button>
             <button
               onClick={() => {
@@ -484,7 +455,10 @@ useEffect(() => {
             <div className="mt-6 p-6 bg-white/5 border border-white/10 rounded-2xl">
               <div className="flex justify-between items-center mb-3">
                 <span className="text-sm text-zinc-400">LinkedIn Post</span>
-                <button onClick={() => navigator.clipboard.writeText(linkedInPost)} className="text-xs text-purple-400 hover:text-purple-300">
+                <button
+                  onClick={() => navigator.clipboard.writeText(linkedInPost)}
+                  className="text-xs text-purple-400 hover:text-purple-300"
+                >
                   Copy
                 </button>
               </div>
@@ -494,6 +468,7 @@ useEffect(() => {
         </section>
       )}
 
+      {/* Empty state */}
       {!loading && slides.length === 0 && (
         <section className="relative z-10 max-w-2xl mx-auto px-6 pb-20 text-center">
           <p className="text-purple-400 text-sm uppercase tracking-[0.3em] mb-4">Showcase</p>
@@ -502,6 +477,7 @@ useEffect(() => {
         </section>
       )}
 
+      {/* HOW IT WORKS */}
       <section className="relative z-10 max-w-4xl mx-auto py-20 px-6">
         <div className="text-center mb-16">
           <p className="text-purple-400 uppercase tracking-[0.3em] text-sm mb-4">How it works</p>
@@ -527,6 +503,7 @@ useEffect(() => {
         </div>
       </section>
 
+      {/* TESTIMONIALS */}
       <section className="relative z-10 max-w-5xl mx-auto py-20 px-6">
         <div className="text-center mb-12">
           <p className="text-purple-400 uppercase tracking-[0.3em] text-sm mb-4">Testimonials</p>
@@ -541,14 +518,14 @@ useEffect(() => {
             </div>
           </div>
           <div className="bg-white/5 border border-purple-500/30 rounded-[24px] p-6">
-            <p className="text-zinc-300 text-sm mb-6">"The Hook to Problem to Solution structure is exactly what top LinkedIn posts use. Game changer."</p>
+            <p className="text-zinc-300 text-sm mb-6">"The Hook → Problem → Solution structure is exactly what top LinkedIn posts use. Game changer."</p>
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-fuchsia-600 flex items-center justify-center font-bold">M</div>
               <div><p className="font-bold text-sm">Maria S.</p><p className="text-zinc-500 text-xs">Startup Founder</p></div>
             </div>
           </div>
           <div className="bg-white/5 border border-white/10 rounded-[24px] p-6">
-            <p className="text-zinc-300 text-sm mb-6">"My engagement went up 3x after I started using AI carousels. Best $49 I ever spent."</p>
+            <p className="text-zinc-300 text-sm mb-6">"My engagement went up 3x after I started using AI carousels. Best $19 I ever spent."</p>
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-cyan-600 flex items-center justify-center font-bold">D</div>
               <div><p className="font-bold text-sm">David N.</p><p className="text-zinc-500 text-xs">Marketing Director</p></div>
@@ -557,112 +534,54 @@ useEffect(() => {
         </div>
       </section>
 
-     <section className="relative z-10 max-w-6xl mx-auto py-32 px-6">
+      {/* PRICING */}
+      <section className="relative z-10 max-w-6xl mx-auto py-32 px-6">
         <div className="text-center mb-16">
           <p className="text-pink-400 uppercase tracking-[0.3em] text-sm mb-4">Pricing</p>
-          <h2 className="text-5xl font-black mb-4">Pay once.<br />Use forever.</h2>
-          <p className="text-zinc-400">No subscriptions. No hidden fees. Upgrade when you're ready.</p>
-        </div>
-        <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
-
-          {/* FREE */}
-          <div className="bg-white/5 border border-white/10 rounded-[32px] p-8 backdrop-blur-xl flex flex-col">
-            <h3 className="text-xl font-bold mb-2">Free</h3>
-            <p className="text-zinc-500 text-sm mb-6">Try before you buy</p>
-            <p className="text-5xl font-black mb-1">$0</p>
-            <p className="text-zinc-600 text-sm mb-8">forever</p>
-            <ul className="space-y-3 text-zinc-300 mb-8 flex-1">
-              <li className="flex items-center gap-2"><span className="text-green-400">✓</span> 3 carousels total</li>
-              <li className="flex items-center gap-2"><span className="text-green-400">✓</span> PNG export</li>
-              <li className="flex items-center gap-2"><span className="text-green-400">✓</span> Basic templates</li>
-              <li className="flex items-center gap-2 text-zinc-600"><span>✗</span> PDF export</li>
-              <li className="flex items-center gap-2 text-zinc-600"><span>✗</span> LinkedIn Post generator</li>
-              <li className="flex items-center gap-2 text-zinc-600"><span>✗</span> Watermark removal</li>
-            </ul>
-            <button className="w-full py-4 rounded-2xl bg-white/10 hover:bg-white/20 transition font-bold">
-              Start Free
-            </button>
-          </div>
-
-          {/* PRO - one-time */}
-          <div className="relative bg-gradient-to-br from-fuchsia-600/30 to-purple-600/20 border border-fuchsia-500/40 rounded-[32px] p-8 shadow-[0_0_60px_rgba(217,70,239,0.25)] flex flex-col">
-            <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-fuchsia-500 text-white text-xs font-black px-4 py-1.5 rounded-full uppercase tracking-widest whitespace-nowrap">
-              BEST VALUE
-            </div>
-            <h3 className="text-xl font-bold mb-2">Pro</h3>
-            <p className="text-zinc-400 text-sm mb-6">One-time payment</p>
-            <p className="text-5xl font-black mb-1">$49</p>
-            <p className="text-zinc-400 text-sm mb-8">pay once, yours forever</p>
-            <ul className="space-y-3 text-zinc-200 mb-8 flex-1">
-              <li className="flex items-center gap-2"><span className="text-green-400">✓</span> 50 carousels</li>
-              <li className="flex items-center gap-2"><span className="text-green-400">✓</span> PNG + PDF export</li>
-              <li className="flex items-center gap-2"><span className="text-green-400">✓</span> All templates</li>
-              <li className="flex items-center gap-2"><span className="text-green-400">✓</span> LinkedIn Post generator</li>
-              <li className="flex items-center gap-2"><span className="text-green-400">✓</span> No watermark</li>
-              <li className="flex items-center gap-2 text-zinc-600"><span>✗</span> Priority support</li>
-            </ul>
-            <button onClick={() => handleUpgrade("pro")} className="w-full py-4 rounded-2xl bg-fuchsia-500 hover:bg-fuchsia-400 transition font-bold shadow-[0_0_30px_rgba(217,70,239,0.4)]">
-              Get Pro — $49
-            </button>
-          </div>
-
-          {/* PRO+ - subscription */}
-          <div className="bg-white/5 border border-purple-500/30 rounded-[32px] p-8 backdrop-blur-xl flex flex-col">
-            <h3 className="text-xl font-bold mb-2">Pro+</h3>
-            <p className="text-zinc-500 text-sm mb-6">For power users</p>
-            <div className="flex items-end gap-1 mb-1">
-              <p className="text-5xl font-black">$19</p>
-              <p className="text-zinc-400 text-sm mb-2">/month</p>
-            </div>
-            <p className="text-zinc-600 text-sm mb-8">cancel anytime</p>
-            <ul className="space-y-3 text-zinc-300 mb-8 flex-1">
-              <li className="flex items-center gap-2"><span className="text-green-400">✓</span> Unlimited carousels</li>
-              <li className="flex items-center gap-2"><span className="text-green-400">✓</span> PNG + PDF export</li>
-              <li className="flex items-center gap-2"><span className="text-green-400">✓</span> All templates</li>
-              <li className="flex items-center gap-2"><span className="text-green-400">✓</span> LinkedIn Post generator</li>
-              <li className="flex items-center gap-2"><span className="text-green-400">✓</span> No watermark</li>
-              <li className="flex items-center gap-2"><span className="text-green-400">✓</span> Priority support</li>
-            </ul>
-            <button onClick={() => handleUpgrade("pro_plus")} className="w-full py-4 rounded-2xl bg-purple-600 hover:bg-purple-500 transition font-bold">
-              Get Pro+ — $19/mo
-            </button>
-          </div>
-
+          <h2 className="text-5xl font-black mb-4">Simple pricing<br />for creators</h2>
+          <p className="text-zinc-400">Start free. Upgrade when you scale.</p>
         </div>
 
-        <p className="text-center text-zinc-600 text-sm mt-10">
-          🔒 Secure payment via Stripe · 30-day money-back guarantee
-        </p>
+        <div className="grid md:grid-cols-3 gap-8">
+          <div className="bg-white/5 border border-white/10 rounded-[32px] p-8 backdrop-blur-xl">
+            <h3 className="text-2xl font-bold mb-4">Free</h3>
+            <p className="text-5xl font-black mb-6">$0</p>
+            <ul className="space-y-3 text-zinc-300 mb-8">
+              <li>• 5 carousels/day</li>
+              <li>• Basic templates</li>
+              <li>• PNG export</li>
+            </ul>
+            <button className="w-full py-4 rounded-2xl bg-white/10 hover:bg-white/20 transition">Start Free</button>
+          </div>
+
+          <div className="bg-gradient-to-br from-fuchsia-600/30 to-purple-600/20 border border-fuchsia-500/40 rounded-[32px] p-8 scale-105 shadow-[0_0_60px_rgba(217,70,239,0.25)]">
+            <p className="text-pink-300 mb-3 text-sm font-bold uppercase tracking-widest">Most Popular</p>
+            <h3 className="text-2xl font-bold mb-4">Pro</h3>
+            <p className="text-5xl font-black mb-6">$19</p>
+            <ul className="space-y-3 text-zinc-200 mb-8">
+              <li>• Unlimited carousels</li>
+              <li>• AI storytelling</li>
+              <li>• PDF export</li>
+              <li>• Viral hooks</li>
+            </ul>
+            <button className="w-full py-4 rounded-2xl bg-fuchsia-500 hover:bg-fuchsia-400 transition font-bold shadow-[0_0_30px_rgba(217,70,239,0.4)]">
+              Go Pro
+            </button>
+          </div>
+
+          <div className="bg-white/5 border border-white/10 rounded-[32px] p-8 backdrop-blur-xl">
+            <h3 className="text-2xl font-bold mb-4">Agency</h3>
+            <p className="text-5xl font-black mb-6">$99</p>
+            <ul className="space-y-3 text-zinc-300 mb-8">
+              <li>• Team access</li>
+              <li>• Brand templates</li>
+              <li>• Priority support</li>
+              <li>• Unlimited exports</li>
+            </ul>
+            <button className="w-full py-4 rounded-2xl bg-white/10 hover:bg-white/20 transition">Contact Sales</button>
+          </div>
+        </div>
       </section>
-
-{showSuccess && (
-  <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center">
-    <div className="bg-zinc-900 border border-green-500/30 rounded-[32px] p-10 max-w-md text-center mx-4">
-      <div className="text-5xl mb-4">🎉</div>
-      <h2 className="text-3xl font-black mb-3">Welcome to Pro!</h2>
-      <p className="text-zinc-400 mb-8">Your account has been upgraded. Enjoy unlimited carousels and PDF export!</p>
-      <button onClick={() => { setShowSuccess(false); window.location.reload(); }} className="w-full py-4 rounded-2xl bg-green-500 hover:bg-green-400 transition font-bold text-lg">
-        Start Creating 🚀
-      </button>
-    </div>
-  </div>
-)}
-
-      {showPaywall && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center">
-          <div className="bg-zinc-900 border border-purple-500/30 rounded-[32px] p-10 max-w-md text-center mx-4">
-            <div className="text-5xl mb-4">🚀</div>
-            <h2 className="text-3xl font-black mb-3">Upgrade to Pro</h2>
-            <p className="text-zinc-400 mb-8">Get 50 carousels + PDF export for just $49 one-time, or go unlimited with Pro+ at $19/month.</p>
-            <button onClick={() => handleUpgrade("pro")} className="w-full py-4 rounded-2xl bg-fuchsia-500 hover:bg-fuchsia-400 transition font-bold text-lg mb-3">
-              Upgrade to Pro — $49
-            </button>
-            <button onClick={() => setShowPaywall(false)} className="text-zinc-500 text-sm hover:text-white transition">
-              Maybe later
-            </button>
-          </div>
-        </div>
-      )}
 
     </main>
   );
