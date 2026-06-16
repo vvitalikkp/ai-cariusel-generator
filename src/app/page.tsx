@@ -222,29 +222,25 @@ useEffect(() => {
     saveAs(content, "carousel.zip");
   }
 
-  async function downloadPDF() {
-    if (!isPro) {
-      setShowPaywall(true);
-      return;
-    }
-    const firstEl = document.getElementById(`slide-0`);
-    if (!firstEl) return;
-    const w = firstEl.offsetWidth;
-    const h = firstEl.offsetHeight;
-    const pdf = new jsPDF({
-      orientation: w > h ? "landscape" : "portrait",
-      unit: "px",
-      format: [w, h],
-    });
-    for (let i = 0; i < slides.length; i++) {
-      const el = document.getElementById(`slide-${i}`);
-      if (!el) continue;
-      const dataUrl = await toPng(el, { pixelRatio: 2, backgroundColor: "#000000" });
-      if (i > 0) pdf.addPage();
-      pdf.addImage(dataUrl, "PNG", 0, 0, w, h);
-    }
-    pdf.save("carousel.pdf");
+   async function downloadPDF() {
+  if (!isPro) {
+    setShowPaywall(true);
+    return;
   }
+  const pdf = new jsPDF({
+    orientation: "portrait",
+    unit: "px",
+    format: [1080, 1350],
+  });
+  for (let i = 0; i < slides.length; i++) {
+    const el = document.getElementById(`slide-${i}`);
+    if (!el) continue;
+    const dataUrl = await toPng(el, { pixelRatio: 2, backgroundColor: "#000000", width: 1080, height: 1350 });
+    if (i > 0) pdf.addPage();
+    pdf.addImage(dataUrl, "PNG", 0, 0, 1080, 1350);
+  }
+  pdf.save("carousel.pdf");
+
 
   return (
     <main className="min-h-screen bg-black text-white overflow-x-hidden relative">
