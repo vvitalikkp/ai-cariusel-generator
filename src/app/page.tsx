@@ -240,7 +240,7 @@ useEffect(() => {
     pdf.addImage(dataUrl, "PNG", 0, 0, 1080, 1350);
   }
   pdf.save("carousel.pdf");
-
+ }
 
   return (
     <main className="min-h-screen bg-black text-white overflow-x-hidden relative">
