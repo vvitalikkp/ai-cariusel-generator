@@ -221,58 +221,69 @@ export default function Home() {
   }
 
   async function downloadPDF() {
-    if (!isPro) {
-      setShowPaywall(true);
-      return;
-    }
+  if (!isPro) {
+    setShowPaywall(true);
+    return;
+  }
 
-    const pdf = new jsPDF({
-      orientation: "portrait",
-      unit: "px",
-      format: [1080, 1350],
+  const pdf = new jsPDF({
+    orientation: "portrait",
+    unit: "px",
+    format: [1080, 1350],
+  });
+
+  for (let i = 0; i < slides.length; i++) {
+    const el = document.getElementById(`slide-${i}`);
+    if (!el) continue;
+
+    const btn = el.querySelector("[data-pdf-hide]") as HTMLElement;
+    if (btn) btn.style.display = "none";
+
+    const textareas = el.querySelectorAll("textarea");
+    const replacements: { ta: HTMLTextAreaElement; div: HTMLDivElement }[] = [];
+    textareas.forEach(ta => {
+      const div = document.createElement("div");
+      div.style.cssText = window.getComputedStyle(ta).cssText;
+      div.style.whiteSpace = "pre-wrap";
+      div.style.overflow = "visible";
+      div.textContent = ta.value;
+      div.className = ta.className;
+      ta.parentNode?.insertBefore(div, ta);
+      ta.style.display = "none";
+      replacements.push({ ta, div });
     });
 
-    const btns = document.querySelectorAll("[data-pdf-hide]") as NodeListOf<HTMLElement>;
-    btns.forEach(b => b.style.display = "none");
+    const prevWidth = el.style.width;
+    const prevHeight = el.style.height;
+    const prevAspect = el.style.aspectRatio;
+    el.style.width = "1080px";
+    el.style.height = "1350px";
+    el.style.aspectRatio = "unset";
 
-    for (let i = 0; i < slides.length; i++) {
-      const el = document.getElementById(`slide-${i}`);
-      if (!el) continue;
+    await new Promise(r => setTimeout(r, 150));
 
-      const prevWidth = el.style.width;
-      const prevHeight = el.style.height;
-      const prevAspect = el.style.aspectRatio;
-      const prevPosition = el.style.position;
+    const dataUrl = await toPng(el, {
+      pixelRatio: 1,
+      width: 1080,
+      height: 1350,
+      backgroundColor: "#000000",
+    });
 
-      el.style.width = "1080px";
-      el.style.height = "1350px";
-      el.style.aspectRatio = "unset";
-     el.style.position = "fixed";
-el.style.top = "0";
-el.style.left = "0";
-el.style.zIndex = "-9999";;
+    el.style.width = prevWidth;
+    el.style.height = prevHeight;
+    el.style.aspectRatio = prevAspect;
+    replacements.forEach(({ ta, div }) => {
+      ta.style.display = "";
+      div.remove();
+    });
+    if (btn) btn.style.display = "";
 
-      await new Promise(r => setTimeout(r, 100));
-
-      const dataUrl = await toPng(el, {
-        pixelRatio: 1,
-        width: 1080,
-        height: 1350,
-        backgroundColor: "#000000",
-      });
-
-      el.style.width = prevWidth;
-      el.style.height = prevHeight;
-      el.style.aspectRatio = prevAspect;
-      el.style.position = prevPosition;
-
-      if (i > 0) pdf.addPage();
-      pdf.addImage(dataUrl, "PNG", 0, 0, 1080, 1350);
-    }
-
-    btns.forEach(b => b.style.display = "");
-    pdf.save("carousel.pdf");
+    if (i > 0) pdf.addPage();
+    pdf.addImage(dataUrl, "PNG", 0, 0, 1080, 1350);
   }
+
+  pdf.save("carousel.pdf");
+}
 
   return (
     <main className="min-h-screen bg-black text-white overflow-x-hidden relative">
