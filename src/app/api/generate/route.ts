@@ -21,31 +21,34 @@ export async function POST(req: Request) {
 
     const openai = new OpenAI({ apiKey })
     const body = await req.json()
-    const { idea, style, tone, email } = body
+    const { idea, style, tone, email, mode } = body
     const toneInstruction = TONE_PRESETS[tone] || TONE_PRESETS.Authority
 
-    let monthlyCount = 0
-    let isPro = false
+    if (!email) {
+      return NextResponse.json({ error: "sign_in_required" })
+    }
 
-    if (email) {
-      const { data: row } = await supabase
-        .from("generation_counts")
-        .select("count, is_pro, updated_at")
-        .eq("email", email)
-        .single()
+    const { data: row } = await supabase
+      .from("generation_counts")
+      .select("count, is_pro, updated_at")
+      .eq("email", email)
+      .single()
 
-      isPro = row?.is_pro || false
+    const isPro = row?.is_pro || false
 
-      const lastUpdate = row?.updated_at ? new Date(row.updated_at) : null
-      const now = new Date()
-      const sameMonth = !!lastUpdate &&
-        lastUpdate.getUTCFullYear() === now.getUTCFullYear() &&
-        lastUpdate.getUTCMonth() === now.getUTCMonth()
-      monthlyCount = sameMonth ? (row?.count || 0) : 0
+    if (mode === "linkedin_post" && !isPro) {
+      return NextResponse.json({ error: "pro_required" })
+    }
 
-      if (!isPro && monthlyCount >= FREE_LIMIT) {
-        return NextResponse.json({ error: "limit_reached" })
-      }
+    const lastUpdate = row?.updated_at ? new Date(row.updated_at) : null
+    const now = new Date()
+    const sameMonth = !!lastUpdate &&
+      lastUpdate.getUTCFullYear() === now.getUTCFullYear() &&
+      lastUpdate.getUTCMonth() === now.getUTCMonth()
+    const monthlyCount = sameMonth ? (row?.count || 0) : 0
+
+    if (!isPro && monthlyCount >= FREE_LIMIT) {
+      return NextResponse.json({ error: "limit_reached" })
     }
 
     const response = await openai.chat.completions.create({
@@ -77,14 +80,12 @@ Return ONLY the JSON array, no markdown, no extra text.`,
     const clean = text.replace(/```json|```/g, "").trim()
     const slides = JSON.parse(clean)
 
-    if (email) {
-      await supabase
-        .from("generation_counts")
-        .upsert(
-          { email, count: monthlyCount + 1, is_pro: isPro, updated_at: new Date().toISOString() },
-          { onConflict: "email" }
-        )
-    }
+    await supabase
+      .from("generation_counts")
+      .upsert(
+        { email, count: monthlyCount + 1, is_pro: isPro, updated_at: new Date().toISOString() },
+        { onConflict: "email" }
+      )
 
     return NextResponse.json({ slides, isPro })
   } catch (e) {

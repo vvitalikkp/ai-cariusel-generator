@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { useSession } from "next-auth/react";
+import { useSession, signIn } from "next-auth/react";
 import { toPng } from "html-to-image";
 import JSZip from "jszip";
 import { saveAs } from "file-saver";
@@ -52,17 +52,26 @@ export default function Create() {
 
   async function generateSlides() {
     if (!idea.trim()) return;
+    if (!session?.user?.email) {
+      signIn();
+      return;
+    }
     setLoading(true);
     setSlides([]);
     try {
       const res = await fetch("/api/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ idea, style, tone, email: session?.user?.email }),
+        body: JSON.stringify({ idea, style, tone, email: session.user.email }),
       });
       const data = await res.json();
       if (data.error === "limit_reached") {
         setShowPaywall(true);
+        setLoading(false);
+        return;
+      }
+      if (data.error === "sign_in_required") {
+        signIn();
         setLoading(false);
         return;
       }
@@ -82,13 +91,25 @@ export default function Create() {
   }
 
   async function regenerateSlide(index: number) {
+    if (!session?.user?.email) {
+      signIn();
+      return;
+    }
     try {
       const res = await fetch("/api/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ idea, style, tone }),
+        body: JSON.stringify({ idea, style, tone, email: session.user.email }),
       });
       const data = await res.json();
+      if (data.error === "limit_reached") {
+        setShowPaywall(true);
+        return;
+      }
+      if (data.error === "sign_in_required") {
+        signIn();
+        return;
+      }
       if (data.slides?.length > 0) {
         const newSlide = data.slides[index] || data.slides[0];
         setSlides((prev) => {
@@ -103,6 +124,14 @@ export default function Create() {
   }
 
   async function generateLinkedInPost() {
+    if (!session?.user?.email) {
+      signIn();
+      return;
+    }
+    if (!isPro) {
+      setShowPaywall(true);
+      return;
+    }
     setLoadingPost(true);
     try {
       const slidesText = slides.map((s, i) => `${i + 1}. ${s.title}: ${s.description}`).join("\n");
@@ -112,9 +141,16 @@ export default function Create() {
         body: JSON.stringify({
           idea: `Write a LinkedIn post (max 200 words) to introduce this carousel about: ${idea}. Slides: ${slidesText}. Include hook, value, and CTA. Add relevant emojis.`,
           style,
+          email: session.user.email,
+          mode: "linkedin_post",
         }),
       });
       const data = await res.json();
+      if (data.error === "pro_required") {
+        setShowPaywall(true);
+        setLoadingPost(false);
+        return;
+      }
       if (data.slides?.[0]?.title) {
         setLinkedInPost(data.slides[0].title + "\n\n" + data.slides[0].description);
       }
@@ -438,9 +474,10 @@ export default function Create() {
             <button
               onClick={generateLinkedInPost}
               disabled={loadingPost}
-              className="px-8 py-4 rounded-2xl bg-blue-600 hover:bg-blue-500 transition font-bold disabled:opacity-50"
+              className={`px-8 py-4 rounded-2xl transition font-bold disabled:opacity-50 flex items-center gap-2 ${isPro ? "bg-blue-600 hover:bg-blue-500" : "bg-white/10 border border-white/10 hover:bg-white/20"}`}
             >
-              {loadingPost ? "Generating..." : "LinkedIn Post"}
+              {!isPro && <span className="text-yellow-400">🔒</span>}
+              {loadingPost ? "Generating..." : `LinkedIn Post ${!isPro ? "(Pro)" : ""}`}
             </button>
           </div>
           {linkedInPost && (
