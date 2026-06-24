@@ -1,354 +1,59 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import { useSession } from "next-auth/react";
-import { toPng } from "html-to-image";
-import JSZip from "jszip";
-import { saveAs } from "file-saver";
-import { SignInButton } from "./components/SignInButton"
-import jsPDF from "jspdf";
-
-const TEMPLATES = {
-  Viral: {
-    card: "bg-black border border-purple-500/40",
-    title: "text-white font-black text-3xl tracking-tight",
-    desc: "text-zinc-400",
-    dot: "bg-pink-400 shadow-[0_0_12px_#f472b6]",
-    num: "text-purple-300",
-    isLight: false,
-  },
-  Storytelling: {
-    card: "bg-gradient-to-br from-fuchsia-900/40 to-black border border-fuchsia-500/30",
-    title: "text-white font-black text-3xl italic",
-    desc: "text-zinc-300",
-    dot: "bg-pink-400 shadow-[0_0_12px_#f472b6]",
-    num: "text-fuchsia-300",
-    isLight: false,
-  },
-  Minimal: {
-    card: "bg-zinc-950 border border-white/10",
-    title: "text-white font-bold text-3xl",
-    desc: "text-zinc-500",
-    dot: "bg-white",
-    num: "text-zinc-500",
-    isLight: false,
-  },
-  Corporate: {
-    card: "bg-blue-950 border border-blue-400/20",
-    title: "text-white font-extrabold text-3xl uppercase",
-    desc: "text-blue-100",
-    dot: "bg-cyan-400 shadow-[0_0_12px_#22d3ee]",
-    num: "text-cyan-300",
-    isLight: false,
-  },
-  Light: {
-    card: "bg-white border border-gray-100",
-    title: "text-gray-900 font-black text-3xl tracking-tight",
-    desc: "text-gray-500",
-    dot: "bg-purple-500",
-    num: "text-gray-300",
-    isLight: true,
-  },
-  Gradient: {
-    card: "bg-gradient-to-br from-violet-600 to-indigo-600 border-0",
-    title: "text-white font-black text-3xl",
-    desc: "text-white/70",
-    dot: "bg-yellow-300 shadow-[0_0_12px_#fde047]",
-    num: "text-white/30",
-    isLight: false,
-  },
-  Bold: {
-    card: "bg-yellow-400 border-0",
-    title: "text-black font-black text-3xl uppercase tracking-tighter",
-    desc: "text-black/60",
-    dot: "bg-black",
-    num: "text-black/20",
-    isLight: true,
-  },
-  Neon: {
-    card: "bg-black border border-green-400/30",
-    title: "text-green-400 font-black text-3xl",
-    desc: "text-green-200/60",
-    dot: "bg-green-400 shadow-[0_0_12px_#4ade80]",
-    num: "text-green-700",
-    isLight: false,
-  },
-  Linear: {
-    card: "bg-[#08090c] border border-white/[0.07]",
-    title: "text-white font-semibold text-3xl tracking-tight",
-    desc: "text-zinc-400",
-    dot: "bg-violet-500 shadow-[0_0_10px_rgba(139,92,246,0.5)]",
-    num: "text-zinc-500",
-    isLight: false,
-  },
-  Stripe: {
-    card: "bg-gradient-to-br from-[#f6f9fc] to-[#eef1f6] border border-black/5",
-    title: "text-slate-900 font-semibold text-3xl tracking-tight",
-    desc: "text-slate-500",
-    dot: "bg-indigo-500 shadow-[0_0_10px_rgba(99,102,241,0.5)]",
-    num: "text-slate-400",
-    isLight: true,
-  },
-  Raycast: {
-    card: "bg-black border border-white/[0.08]",
-    title: "text-white font-semibold text-3xl tracking-tight",
-    desc: "text-zinc-400",
-    dot: "bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.5)]",
-    num: "text-red-400",
-    isLight: false,
-  },
-} as const;
-
-type TemplateKey = keyof typeof TEMPLATES;
-
-const TONES = ["Storytelling", "Authority", "Contrarian", "Data-Driven"] as const;
-type ToneKey = (typeof TONES)[number];
-
-const SHOWCASE_EXAMPLES: { style: TemplateKey; title: string; desc: string }[] = [
-  {
-    style: "Viral",
-    title: "I Quit My 9-to-5 to Build This",
-    desc: "Everyone said I was crazy. Six months later, this side project pays my rent. Here's exactly what changed.",
-  },
-  {
-    style: "Stripe",
-    title: "3 Metrics Every Founder Should Track",
-    desc: "Most founders obsess over vanity metrics. These three numbers actually predict whether your startup survives.",
-  },
-  {
-    style: "Linear",
-    title: "Why Most Startups Get Positioning Wrong",
-    desc: "You're not competing on features. You're competing on a single sentence in your customer's head.",
-  },
-  {
-    style: "Gradient",
-    title: "The LinkedIn Algorithm Just Changed",
-    desc: "Reach dropped 40% overnight for most creators. Here's what's actually working in the new feed.",
-  },
-];
-
-interface Slide {
-  title: string;
-  description: string;
-  type: string;
-}
+import { SignInButton } from "./components/SignInButton";
+import { TEMPLATES, SHOWCASE_EXAMPLES } from "@/lib/templates";
 
 export default function Home() {
-  const [idea, setIdea] = useState("");
-  const [style, setStyle] = useState<TemplateKey>("Viral");
-  const [tone, setTone] = useState<ToneKey>("Authority");
-  const [slides, setSlides] = useState<Slide[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [linkedInPost, setLinkedInPost] = useState("")
-  const [loadingPost, setLoadingPost] = useState(false)
-  const [cardFont, setCardFont] = useState("font-sans")
-  const [userName, setUserName] = useState("CarouselAI")
-  const [userAvatar, setUserAvatar] = useState<string | null>(null)
-  const [showPaywall, setShowPaywall] = useState(false)
-  const [isPro, setIsPro] = useState(false)
-  const [showSuccess, setShowSuccess] = useState(false)
-  const t = TEMPLATES[style];
+  const [isPro, setIsPro] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
   const { data: session } = useSession();
 
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search)
+    const params = new URLSearchParams(window.location.search);
     if (params.get("success") === "true") {
-      setShowSuccess(true)
-      window.history.replaceState({}, "", "/")
+      setShowSuccess(true);
+      window.history.replaceState({}, "", "/");
     }
-  }, [])
+  }, []);
 
   useEffect(() => {
     async function checkPro() {
-      if (!session?.user?.email) return
+      if (!session?.user?.email) return;
       try {
         const res = await fetch("/api/check-pro", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email: session.user.email }),
-        })
-        const data = await res.json()
-        setIsPro(data.isPro || false)
-      } catch (e) {
-        console.error(e)
-      }
-    }
-    checkPro()
-  }, [session])
-
-  async function generateSlides() {
-    if (!idea.trim()) return;
-    setLoading(true);
-    setSlides([]);
-    try {
-      const res = await fetch("/api/generate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ idea, style, tone, email: session?.user?.email }),
-      });
-      const data = await res.json();
-      if (data.error === "limit_reached") {
-        setShowPaywall(true);
-        setLoading(false);
-        return;
-      }
-      setSlides(data.slides || []);
-    } catch (e) {
-      console.error(e);
-    }
-    setLoading(false);
-  }
-
-  function updateSlide(index: number, field: "title" | "description", value: string) {
-    setSlides((prev) => {
-      const next = [...prev];
-      next[index] = { ...next[index], [field]: value };
-      return next;
-    });
-  }
-
-  async function regenerateSlide(index: number) {
-    try {
-      const res = await fetch("/api/generate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ idea, style, tone }),
-      });
-      const data = await res.json();
-      if (data.slides?.length > 0) {
-        const newSlide = data.slides[index] || data.slides[0];
-        setSlides((prev) => {
-          const next = [...prev];
-          next[index] = newSlide;
-          return next;
         });
+        const data = await res.json();
+        setIsPro(data.isPro || false);
+      } catch (e) {
+        console.error(e);
       }
-    } catch (e) {
-      console.error(e);
     }
-  }
-
-  async function generateLinkedInPost() {
-    setLoadingPost(true)
-    try {
-      const slidesText = slides.map((s, i) => `${i + 1}. ${s.title}: ${s.description}`).join("\n")
-      const res = await fetch("/api/generate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          idea: `Write a LinkedIn post (max 200 words) to introduce this carousel about: ${idea}. Slides: ${slidesText}. Include hook, value, and CTA. Add relevant emojis.`,
-          style
-        }),
-      })
-      const data = await res.json()
-      if (data.slides?.[0]?.title) {
-        setLinkedInPost(data.slides[0].title + "\n\n" + data.slides[0].description)
-      }
-    } catch (e) {
-      console.error(e)
-    }
-    setLoadingPost(false)
-  }
+    checkPro();
+  }, [session]);
 
   async function handleUpgrade(plan: "pro_monthly" | "pro_annual" = "pro_monthly") {
     if (!session?.user?.email) {
-      alert("Please sign in first to upgrade")
-      return
+      alert("Please sign in first to upgrade");
+      return;
     }
     const res = await fetch("/api/checkout", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email: session?.user?.email, plan }),
-    })
-    const data = await res.json()
-    if (data.url) window.location.href = data.url
-    else alert("Error: " + JSON.stringify(data))
-  }
-
-  async function downloadPNG() {
-    const zip = new JSZip();
-    for (let i = 0; i < slides.length; i++) {
-      const el = document.getElementById(`slide-${i}`);
-      if (!el) continue;
-      const dataUrl = await toPng(el, { pixelRatio: 2, backgroundColor: "#000" });
-      const blob = await (await fetch(dataUrl)).blob();
-      zip.file(`slide-${i + 1}.png`, blob);
-    }
-    const content = await zip.generateAsync({ type: "blob" });
-    saveAs(content, "carousel.zip");
-  }
-
-  async function downloadPDF() {
-  if (!isPro) {
-    setShowPaywall(true);
-    return;
-  }
-
-  const PAGE_W = 540;
-  const PAGE_H = 675;
-
-  const pdf = new jsPDF({
-    orientation: "portrait",
-    unit: "px",
-    format: [PAGE_W, PAGE_H],
-  });
-
-  for (let i = 0; i < slides.length; i++) {
-    const el = document.getElementById(`slide-${i}`);
-    if (!el) continue;
-
-    const btn = el.querySelector("[data-pdf-hide]") as HTMLElement;
-    if (btn) btn.style.display = "none";
-
-    const textareas = el.querySelectorAll("textarea");
-    const replacements: { ta: HTMLTextAreaElement; div: HTMLDivElement }[] = [];
-    textareas.forEach(ta => {
-      const div = document.createElement("div");
-      div.style.cssText = window.getComputedStyle(ta).cssText;
-      div.style.whiteSpace = "pre-wrap";
-      div.style.overflow = "visible";
-      div.textContent = ta.value;
-      div.className = ta.className;
-      ta.parentNode?.insertBefore(div, ta);
-      ta.style.display = "none";
-      replacements.push({ ta, div });
     });
-
-    const prevWidth = el.style.width;
-    const prevHeight = el.style.height;
-    const prevAspect = el.style.aspectRatio;
-    el.style.width = "1080px";
-    el.style.height = "1350px";
-    el.style.aspectRatio = "unset";
-
-    await new Promise(r => setTimeout(r, 150));
-
-    const dataUrl = await toPng(el, {
-      pixelRatio: 1,
-      width: 1080,
-      height: 1350,
-      backgroundColor: "#000000",
-    });
-
-    el.style.width = prevWidth;
-    el.style.height = prevHeight;
-    el.style.aspectRatio = prevAspect;
-    replacements.forEach(({ ta, div }) => {
-      ta.style.display = "";
-      div.remove();
-    });
-    if (btn) btn.style.display = "";
-
-    if (i > 0) pdf.addPage();
-    pdf.addImage(dataUrl, "PNG", 0, 0, PAGE_W, PAGE_H);
+    const data = await res.json();
+    if (data.url) window.location.href = data.url;
+    else alert("Error: " + JSON.stringify(data));
   }
-
-  pdf.save("carousel.pdf");
-}
 
   return (
     <main className="min-h-screen bg-black text-white overflow-x-hidden relative">
-
       <div className="fixed inset-0 pointer-events-none">
         <div className="absolute top-[-200px] left-[-200px] w-[500px] h-[500px] bg-fuchsia-600/20 rounded-full blur-[140px]" />
         <div className="absolute bottom-[-200px] right-[-200px] w-[500px] h-[500px] bg-purple-700/20 rounded-full blur-[140px]" />
@@ -362,11 +67,14 @@ export default function Home() {
           <button className="hover:text-white transition">Github</button>
           {isPro && <span className="px-3 py-1 rounded-full bg-fuchsia-500/20 border border-fuchsia-500/40 text-fuchsia-300 text-xs font-bold">PRO</span>}
           <SignInButton />
+          <Link href="/create" className="bg-purple-600 hover:bg-purple-500 text-white px-5 py-2 rounded-lg text-sm font-bold transition">
+            Create Carousel →
+          </Link>
         </div>
       </nav>
 
       <section className="relative z-10 max-w-7xl mx-auto px-6 pt-20 pb-32">
-        <div className="grid lg:grid-cols-2 gap-16 items-start">
+        <div className="grid lg:grid-cols-2 gap-16 items-center">
           <div>
             <div className="mb-6 inline-block px-5 py-2 rounded-full border border-white/10 bg-white/5 backdrop-blur-xl text-sm">
               AI-powered LinkedIn Growth
@@ -374,244 +82,40 @@ export default function Home() {
             <h1 className="text-6xl font-black leading-tight mb-6 tracking-tight">
               Create Viral<br />LinkedIn Carousels<br />with AI
             </h1>
-            <p className="text-zinc-400 text-xl mb-4 max-w-xl">
-              Generate beautiful carousel posts, hooks, and viral content in seconds.
+            <p className="text-zinc-400 text-xl mb-6 max-w-xl">
+              Paste a tweet, an idea, or an article. Get a polished 6-slide carousel — hook, structure, and design handled by AI.
             </p>
-            <p className="text-sm text-zinc-500">Start creating viral LinkedIn content today</p>
-          </div>
-
-          <div className="flex flex-col gap-4">
-            <div className="flex gap-3 flex-wrap">
-              {(Object.keys(TEMPLATES) as TemplateKey[]).map((item) => (
-                <button
-                  key={item}
-                  onClick={() => setStyle(item)}
-                  className={`px-5 py-2 rounded-full border transition-all duration-200 text-sm ${
-                    style === item
-                      ? "bg-purple-600 border-purple-500 text-white"
-                      : "bg-white/5 border-white/10 text-zinc-300 hover:border-purple-500/40"
-                  }`}
-                >
-                  {item}
-                </button>
-              ))}
+            <div className="flex flex-col gap-2 mb-8 text-sm text-zinc-300">
+              <span className="flex items-center gap-2"><span className="text-green-400">✓</span> 11 premium templates, 4 AI tone presets</span>
+              <span className="flex items-center gap-2"><span className="text-green-400">✓</span> Export to PNG or PDF in one click</span>
+              <span className="flex items-center gap-2"><span className="text-green-400">✓</span> Free to try, no credit card required</span>
             </div>
-
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-xs text-zinc-500 uppercase tracking-wider mr-1">Tone:</span>
-              {TONES.map((item) => (
-                <button
-                  key={item}
-                  onClick={() => setTone(item)}
-                  className={`px-4 py-1.5 rounded-full border transition-all duration-200 text-xs ${
-                    tone === item
-                      ? "bg-fuchsia-600 border-fuchsia-500 text-white"
-                      : "bg-white/5 border-white/10 text-zinc-400 hover:border-fuchsia-500/40"
-                  }`}
-                >
-                  {item}
-                </button>
-              ))}
-            </div>
-
-            <div className="flex gap-3">
-              <textarea
-                id="idea-input"
-                placeholder="Paste your text, tweet, article or just an idea..."
-                value={idea}
-                onChange={(e) => setIdea(e.target.value)}
-                className="flex-1 px-6 py-4 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-xl outline-none text-base focus:border-purple-500 transition resize-none h-32"
-              />
-              <button
-                onClick={generateSlides}
-                disabled={loading || !idea.trim()}
-                className="px-8 py-4 rounded-2xl bg-purple-600 hover:bg-purple-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all font-bold shadow-[0_0_30px_rgba(168,85,247,0.4)] whitespace-nowrap"
+            <div className="flex items-center gap-4">
+              <Link
+                href="/create"
+                className="px-8 py-4 rounded-2xl bg-purple-600 hover:bg-purple-500 transition-all font-bold shadow-[0_0_30px_rgba(168,85,247,0.4)] inline-block"
               >
-                {loading ? (
-                  <span className="flex items-center gap-2">
-                    <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                    Generating...
-                  </span>
-                ) : (
-                  "Generate ✦"
-                )}
-              </button>
+                Create Your Carousel ✦
+              </Link>
+              <a href="#showcase" className="text-zinc-400 hover:text-white text-sm transition">See examples ↓</a>
             </div>
           </div>
-        </div>
-      </section>
 
-      {slides.length > 0 && (
-        <section className="relative z-10 max-w-2xl mx-auto px-6 pb-20">
-          <h2 className="text-2xl font-black mb-8 text-center">
-            Your carousel — <span className="text-purple-400">{slides.length} slides</span>
-          </h2>
-          <div className="flex gap-2 justify-center mb-6 flex-wrap">
-            {slides.map((_, i) => (
-              <button
-                key={i}
-                onClick={() => document.getElementById(`slide-${i}`)?.scrollIntoView({ behavior: "smooth", block: "center" })}
-                className="w-8 h-8 rounded-full bg-white/10 hover:bg-purple-500 transition text-xs font-bold text-white/60 hover:text-white border border-white/10"
-              >
-                {i + 1}
-              </button>
-            ))}
-          </div>
-          <div className="flex flex-wrap gap-4 justify-center mb-6">
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-zinc-400">Font:</span>
-              {["font-sans", "font-serif", "font-mono"].map((font) => (
-                <button
-                  key={font}
-                  onClick={() => setCardFont(font)}
-                  className={`text-xs px-3 py-1 rounded-full border border-white/20 hover:border-white transition ${cardFont === font ? "bg-white/20" : ""}`}
-                >
-                  {font.replace("font-", "")}
-                </button>
-              ))}
-            </div>
-            <div className="flex items-center gap-3 mt-2">
-              <span className="text-sm text-zinc-400">Name:</span>
-              <input
-                type="text"
-                value={userName}
-                onChange={(e) => setUserName(e.target.value)}
-                className="bg-white/10 text-white text-sm px-3 py-1 rounded-full outline-none border border-white/20 w-32"
-                placeholder="Your name"
-              />
-              <label className="cursor-pointer text-sm text-zinc-400 hover:text-white transition">
-                Photo
-                <input type="file" accept="image/*" className="hidden"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0]
-                    if (file) {
-                      const reader = new FileReader()
-                      reader.onload = () => setUserAvatar(reader.result as string)
-                      reader.readAsDataURL(file)
-                    }
-                  }}
-                />
-              </label>
-            </div>
-          </div>
-          <div className="space-y-4">
-            {slides.map((slide, i) => (
-              <div
-                key={i}
-                id={`slide-${i}`}
-                className={`relative rounded-[28px] overflow-hidden ${t.card}`}
-                style={{ width: "100%", aspectRatio: "4/5" }}
-              >
-                <div className={`relative z-10 flex flex-col h-full p-8 ${cardFont}`}>
-                  <div className="flex items-center justify-between">
-                    <span className={`text-xs font-bold tracking-[0.3em] uppercase ${t.num}`}>
-                      {String(i + 1).padStart(2, "0")} / {slides.length.toString().padStart(2, "0")}
-                    </span>
-                    <div className={`w-2.5 h-2.5 rounded-full ${t.dot}`} />
-                  </div>
-
-                  <div className="flex-1 flex flex-col justify-center gap-5 py-8">
-                    <textarea
-                      value={slide.title}
-                      onChange={(e) => updateSlide(i, "title", e.target.value)}
-                      className={`w-full bg-transparent resize-none outline-none leading-tight ${t.title}`}
-                      rows={3}
-                    />
-                    <textarea
-                      value={slide.description}
-                      onChange={(e) => updateSlide(i, "description", e.target.value)}
-                      className={`w-full bg-transparent resize-none outline-none leading-relaxed text-base ${t.desc}`}
-                      rows={4}
-                    />
-                  </div>
-
-                  <div className={`flex items-center gap-2 pt-4 border-t ${t.isLight ? "border-black/10" : "border-white/10"}`}>
-                    {userAvatar ? (
-                      <img src={userAvatar} className="w-6 h-6 rounded-full object-cover" />
-                    ) : (
-                      <div className="w-6 h-6 rounded-full bg-purple-500 flex items-center justify-center text-xs font-bold text-white">
-                        {userName[0]}
-                      </div>
-                    )}
-                    <span className={`text-xs ${t.isLight ? "text-black/40" : "text-white/40"}`}>{userName}</span>
-                    {isPro ? (
-                      <span className={`ml-auto text-[10px] font-medium tracking-widest uppercase ${t.isLight ? "text-black/20" : "text-white/20"}`}>CarouselAI</span>
-                    ) : (
-                      <span className={`ml-auto text-[10px] font-bold tracking-wide uppercase px-2 py-1 rounded-full border ${t.isLight ? "bg-black/5 text-black/60 border-black/10" : "bg-white/10 text-white/70 border-white/20"}`}>
-                        Made with CarouselAI
-                      </span>
-                    )}
-                  </div>
-
-                  <button
-                    data-pdf-hide
-                    onClick={() => regenerateSlide(i)}
-                    className={`absolute top-3 left-1/2 -translate-x-1/2 text-[10px] transition px-3 py-1 rounded-full border ${t.isLight ? "text-black/40 hover:text-black bg-black/5 hover:bg-black/10 border-black/10" : "text-white/40 hover:text-white bg-white/5 hover:bg-white/10 border-white/10"}`}
-                  >
-                    regenerate
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <div className="flex flex-col sm:flex-row gap-3 mt-10 justify-center">
-            <button onClick={downloadPNG} className="px-8 py-4 rounded-2xl bg-purple-600 hover:bg-purple-500 transition font-bold">
-              Download PNG (ZIP)
-            </button>
-            <button
-              onClick={downloadPDF}
-              className={`px-8 py-4 rounded-2xl transition font-bold flex items-center gap-2 ${isPro ? "bg-fuchsia-600 hover:bg-fuchsia-500" : "bg-white/10 border border-white/10 hover:bg-white/20"}`}
-            >
-              {!isPro && <span className="text-yellow-400">🔒</span>}
-              Export PDF {!isPro && "(Pro)"}
-            </button>
-            <button
-              onClick={() => {
-                const text = slides.map((s, i) => `${i + 1}. ${s.title}\n${s.description}`).join("\n\n");
-                navigator.clipboard.writeText(text);
-              }}
-              className="px-8 py-4 rounded-2xl bg-white/10 border border-white/10 hover:bg-white/20 transition"
-            >
-              Copy All Text
-            </button>
-            <button
-              onClick={generateLinkedInPost}
-              disabled={loadingPost}
-              className="px-8 py-4 rounded-2xl bg-blue-600 hover:bg-blue-500 transition font-bold disabled:opacity-50"
-            >
-              {loadingPost ? "Generating..." : "LinkedIn Post"}
-            </button>
-          </div>
-          {linkedInPost && (
-            <div className="mt-6 p-6 bg-white/5 border border-white/10 rounded-2xl">
-              <div className="flex justify-between items-center mb-3">
-                <span className="text-sm text-zinc-400">LinkedIn Post</span>
-                <button onClick={() => navigator.clipboard.writeText(linkedInPost)} className="text-xs text-purple-400 hover:text-purple-300">
-                  Copy
-                </button>
-              </div>
-              <p className="text-sm text-zinc-300 whitespace-pre-wrap">{linkedInPost}</p>
-            </div>
-          )}
-        </section>
-      )}
-
-      {!loading && slides.length === 0 && (
-        <section className="relative z-10 max-w-4xl mx-auto px-6 pb-20">
-          <div className="text-center mb-12">
-            <p className="text-purple-400 text-sm uppercase tracking-[0.3em] mb-4">Showcase</p>
-            <h2 className="text-4xl font-black mb-4">See what creators generate</h2>
-            <p className="text-zinc-500">Real templates, real output — not mockups</p>
-          </div>
-          <div className="grid sm:grid-cols-2 gap-5">
-            {SHOWCASE_EXAMPLES.map((ex, i) => {
+          <div className="relative h-[480px] hidden lg:block">
+            {[SHOWCASE_EXAMPLES[2], SHOWCASE_EXAMPLES[0]].map((ex, i) => {
               const et = TEMPLATES[ex.style];
               return (
                 <div
                   key={i}
-                  className={`relative rounded-[24px] overflow-hidden ${et.card}`}
-                  style={{ aspectRatio: "4/5" }}
+                  className={`absolute rounded-[28px] overflow-hidden shadow-2xl ${et.card}`}
+                  style={{
+                    width: 280,
+                    aspectRatio: "4/5",
+                    top: i === 0 ? 0 : 70,
+                    left: i === 0 ? 40 : 200,
+                    transform: i === 0 ? "rotate(-4deg)" : "rotate(3deg)",
+                    zIndex: i,
+                  }}
                 >
                   <div className="relative z-10 flex flex-col h-full p-7">
                     <div className="flex items-center justify-between mb-2">
@@ -624,27 +128,54 @@ export default function Home() {
                       <p className={`leading-tight ${et.title}`}>{ex.title}</p>
                       <p className={`leading-relaxed text-xs ${et.desc}`}>{ex.desc}</p>
                     </div>
-                    <span className={`text-[9px] font-bold uppercase tracking-wide self-end px-2 py-1 rounded-full ${et.isLight ? "bg-black/5 text-black/50" : "bg-white/10 text-white/50"}`}>
-                      Made with CarouselAI
-                    </span>
                   </div>
                 </div>
               );
             })}
           </div>
-          <div className="text-center mt-10">
-            <button
-              onClick={() => {
-                window.scrollTo({ top: 0, behavior: "smooth" });
-                document.getElementById("idea-input")?.focus();
-              }}
-              className="px-8 py-4 rounded-2xl bg-purple-600 hover:bg-purple-500 transition font-bold"
-            >
-              Try it yourself ↑
-            </button>
-          </div>
-        </section>
-      )}
+        </div>
+      </section>
+
+      <section id="showcase" className="relative z-10 max-w-4xl mx-auto px-6 pb-20">
+        <div className="text-center mb-12">
+          <p className="text-purple-400 text-sm uppercase tracking-[0.3em] mb-4">Showcase</p>
+          <h2 className="text-4xl font-black mb-4">See what creators generate</h2>
+          <p className="text-zinc-500">Real templates, real output — not mockups</p>
+        </div>
+        <div className="grid sm:grid-cols-2 gap-5">
+          {SHOWCASE_EXAMPLES.map((ex, i) => {
+            const et = TEMPLATES[ex.style];
+            return (
+              <div
+                key={i}
+                className={`relative rounded-[24px] overflow-hidden ${et.card}`}
+                style={{ aspectRatio: "4/5" }}
+              >
+                <div className="relative z-10 flex flex-col h-full p-7">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className={`text-[10px] font-bold uppercase tracking-widest ${et.isLight ? "text-black/30" : "text-white/30"}`}>
+                      {ex.style}
+                    </span>
+                    <div className={`w-2 h-2 rounded-full ${et.dot}`} />
+                  </div>
+                  <div className="flex-1 flex flex-col justify-center gap-3">
+                    <p className={`leading-tight ${et.title}`}>{ex.title}</p>
+                    <p className={`leading-relaxed text-xs ${et.desc}`}>{ex.desc}</p>
+                  </div>
+                  <span className={`text-[9px] font-bold uppercase tracking-wide self-end px-2 py-1 rounded-full ${et.isLight ? "bg-black/5 text-black/50" : "bg-white/10 text-white/50"}`}>
+                    Made with CarouselAI
+                  </span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+        <div className="text-center mt-10">
+          <Link href="/create" className="px-8 py-4 rounded-2xl bg-purple-600 hover:bg-purple-500 transition font-bold inline-block">
+            Try it yourself →
+          </Link>
+        </div>
+      </section>
 
       <section className="relative z-10 max-w-4xl mx-auto py-20 px-6">
         <div className="text-center mb-16">
@@ -678,21 +209,21 @@ export default function Home() {
         </div>
         <div className="grid md:grid-cols-3 gap-6">
           <div className="bg-white/5 border border-white/10 rounded-[24px] p-6">
-            <p className="text-zinc-300 text-sm mb-6">"I went from spending 2 hours on a carousel to 2 minutes. This tool is insane."</p>
+            <p className="text-zinc-300 text-sm mb-6">&ldquo;I went from spending 2 hours on a carousel to 2 minutes. This tool is insane.&rdquo;</p>
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-purple-600 flex items-center justify-center font-bold">A</div>
               <div><p className="font-bold text-sm">Alex K.</p><p className="text-zinc-500 text-xs">LinkedIn Creator, 45k followers</p></div>
             </div>
           </div>
           <div className="bg-white/5 border border-purple-500/30 rounded-[24px] p-6">
-            <p className="text-zinc-300 text-sm mb-6">"The Hook to Problem to Solution structure is exactly what top LinkedIn posts use. Game changer."</p>
+            <p className="text-zinc-300 text-sm mb-6">&ldquo;The Hook to Problem to Solution structure is exactly what top LinkedIn posts use. Game changer.&rdquo;</p>
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-fuchsia-600 flex items-center justify-center font-bold">M</div>
               <div><p className="font-bold text-sm">Maria S.</p><p className="text-zinc-500 text-xs">Startup Founder</p></div>
             </div>
           </div>
           <div className="bg-white/5 border border-white/10 rounded-[24px] p-6">
-            <p className="text-zinc-300 text-sm mb-6">"My engagement went up 3x after I started using AI carousels. Best $24/month I spend on my brand."</p>
+            <p className="text-zinc-300 text-sm mb-6">&ldquo;My engagement went up 3x after I started using AI carousels. Best $24/month I spend on my brand.&rdquo;</p>
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-cyan-600 flex items-center justify-center font-bold">D</div>
               <div><p className="font-bold text-sm">David N.</p><p className="text-zinc-500 text-xs">Marketing Director</p></div>
@@ -705,7 +236,7 @@ export default function Home() {
         <div className="text-center mb-16">
           <p className="text-pink-400 uppercase tracking-[0.3em] text-sm mb-4">Pricing</p>
           <h2 className="text-5xl font-black mb-4">Simple pricing<br />for creators</h2>
-          <p className="text-zinc-400">Start free. Upgrade when you're ready to remove the watermark.</p>
+          <p className="text-zinc-400">Start free. Upgrade when you&apos;re ready to remove the watermark.</p>
         </div>
         <div className="grid md:grid-cols-2 gap-6 max-w-3xl mx-auto">
           <div className="bg-white/5 border border-white/10 rounded-[32px] p-8 backdrop-blur-xl flex flex-col">
@@ -720,7 +251,7 @@ export default function Home() {
               <li className="flex items-center gap-2 text-zinc-600"><span>✗</span> PDF export</li>
               <li className="flex items-center gap-2 text-zinc-600"><span>✗</span> Watermark removal</li>
             </ul>
-            <button className="w-full py-4 rounded-2xl bg-white/10 hover:bg-white/20 transition font-bold">Start Free</button>
+            <Link href="/create" className="w-full py-4 rounded-2xl bg-white/10 hover:bg-white/20 transition font-bold text-center">Start Free</Link>
           </div>
 
           <div className="relative bg-gradient-to-br from-fuchsia-600/30 to-purple-600/20 border border-fuchsia-500/40 rounded-[32px] p-8 shadow-[0_0_60px_rgba(217,70,239,0.25)] flex flex-col">
@@ -752,19 +283,7 @@ export default function Home() {
             <div className="text-5xl mb-4">🎉</div>
             <h2 className="text-3xl font-black mb-3">Welcome to Pro!</h2>
             <p className="text-zinc-400 mb-8">Your account has been upgraded. Enjoy unlimited carousels and PDF export!</p>
-            <button onClick={() => { setShowSuccess(false); window.location.reload(); }} className="w-full py-4 rounded-2xl bg-green-500 hover:bg-green-400 transition font-bold text-lg">Start Creating 🚀</button>
-          </div>
-        </div>
-      )}
-
-      {showPaywall && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center">
-          <div className="bg-zinc-900 border border-purple-500/30 rounded-[32px] p-10 max-w-md text-center mx-4">
-            <div className="text-5xl mb-4">🚀</div>
-            <h2 className="text-3xl font-black mb-3">Upgrade to Pro</h2>
-            <p className="text-zinc-400 mb-8">Get unlimited carousels, PDF export, and no watermark for $24/month — or $19/mo billed annually.</p>
-            <button onClick={() => handleUpgrade("pro_monthly")} className="w-full py-4 rounded-2xl bg-fuchsia-500 hover:bg-fuchsia-400 transition font-bold text-lg mb-3">Upgrade to Pro — $24/mo</button>
-            <button onClick={() => setShowPaywall(false)} className="text-zinc-500 text-sm hover:text-white transition">Maybe later</button>
+            <Link href="/create" onClick={() => setShowSuccess(false)} className="w-full py-4 rounded-2xl bg-green-500 hover:bg-green-400 transition font-bold text-lg inline-block">Start Creating 🚀</Link>
           </div>
         </div>
       )}
