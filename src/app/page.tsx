@@ -15,6 +15,7 @@ const TEMPLATES = {
     desc: "text-zinc-400",
     dot: "bg-pink-400 shadow-[0_0_12px_#f472b6]",
     num: "text-purple-300",
+    isLight: false,
   },
   Storytelling: {
     card: "bg-gradient-to-br from-fuchsia-900/40 to-black border border-fuchsia-500/30",
@@ -22,6 +23,7 @@ const TEMPLATES = {
     desc: "text-zinc-300",
     dot: "bg-pink-400 shadow-[0_0_12px_#f472b6]",
     num: "text-fuchsia-300",
+    isLight: false,
   },
   Minimal: {
     card: "bg-zinc-950 border border-white/10",
@@ -29,6 +31,7 @@ const TEMPLATES = {
     desc: "text-zinc-500",
     dot: "bg-white",
     num: "text-zinc-500",
+    isLight: false,
   },
   Corporate: {
     card: "bg-blue-950 border border-blue-400/20",
@@ -36,6 +39,7 @@ const TEMPLATES = {
     desc: "text-blue-100",
     dot: "bg-cyan-400 shadow-[0_0_12px_#22d3ee]",
     num: "text-cyan-300",
+    isLight: false,
   },
   Light: {
     card: "bg-white border border-gray-100",
@@ -43,6 +47,7 @@ const TEMPLATES = {
     desc: "text-gray-500",
     dot: "bg-purple-500",
     num: "text-gray-300",
+    isLight: true,
   },
   Gradient: {
     card: "bg-gradient-to-br from-violet-600 to-indigo-600 border-0",
@@ -50,6 +55,7 @@ const TEMPLATES = {
     desc: "text-white/70",
     dot: "bg-yellow-300 shadow-[0_0_12px_#fde047]",
     num: "text-white/30",
+    isLight: false,
   },
   Bold: {
     card: "bg-yellow-400 border-0",
@@ -57,13 +63,39 @@ const TEMPLATES = {
     desc: "text-black/60",
     dot: "bg-black",
     num: "text-black/20",
+    isLight: true,
   },
   Neon: {
     card: "bg-black border border-green-400/30",
     title: "text-green-400 font-black text-3xl",
     desc: "text-green-200/60",
     dot: "bg-green-400 shadow-[0_0_12px_#4ade80]",
-    num: "text-green-900",
+    num: "text-green-700",
+    isLight: false,
+  },
+  Linear: {
+    card: "bg-[#08090c] border border-white/[0.07]",
+    title: "text-white font-semibold text-3xl tracking-tight",
+    desc: "text-zinc-400",
+    dot: "bg-violet-500 shadow-[0_0_10px_rgba(139,92,246,0.5)]",
+    num: "text-zinc-500",
+    isLight: false,
+  },
+  Stripe: {
+    card: "bg-gradient-to-br from-[#f6f9fc] to-[#eef1f6] border border-black/5",
+    title: "text-slate-900 font-semibold text-3xl tracking-tight",
+    desc: "text-slate-500",
+    dot: "bg-indigo-500 shadow-[0_0_10px_rgba(99,102,241,0.5)]",
+    num: "text-slate-400",
+    isLight: true,
+  },
+  Raycast: {
+    card: "bg-black border border-white/[0.08]",
+    title: "text-white font-semibold text-3xl tracking-tight",
+    desc: "text-zinc-400",
+    dot: "bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.5)]",
+    num: "text-red-400",
+    isLight: false,
   },
 } as const;
 
@@ -86,7 +118,6 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [linkedInPost, setLinkedInPost] = useState("")
   const [loadingPost, setLoadingPost] = useState(false)
-  const [cardColor, setCardColor] = useState("#2d1b69")
   const [cardFont, setCardFont] = useState("font-sans")
   const [userName, setUserName] = useState("CarouselAI")
   const [userAvatar, setUserAvatar] = useState<string | null>(null)
@@ -404,17 +435,6 @@ export default function Home() {
           </div>
           <div className="flex flex-wrap gap-4 justify-center mb-6">
             <div className="flex items-center gap-2">
-              <span className="text-sm text-zinc-400">Color:</span>
-              {["#2d1b69", "#1a3a2d", "#1a1a3e", "#3a1a1a", "#1a2a3a"].map((color) => (
-                <button
-                  key={color}
-                  onClick={() => setCardColor(color)}
-                  className="w-6 h-6 rounded-full border-2 border-transparent hover:border-white transition"
-                  style={{ backgroundColor: color }}
-                />
-              ))}
-            </div>
-            <div className="flex items-center gap-2">
               <span className="text-sm text-zinc-400">Font:</span>
               {["font-sans", "font-serif", "font-mono"].map((font) => (
                 <button
@@ -455,18 +475,12 @@ export default function Home() {
               <div
                 key={i}
                 id={`slide-${i}`}
-                className="relative rounded-[28px] overflow-hidden"
-                style={{
-                  width: "100%",
-                  aspectRatio: "4/5",
-                  background: i % 2 === 0
-                    ? `linear-gradient(135deg, ${cardColor} 0%, ${cardColor}99 50%, ${cardColor} 100%)`
-                    : `linear-gradient(135deg, #0f0f1a 0%, ${cardColor}44 50%, #0f0f1a 100%)`,
-                }}
+                className={`relative rounded-[28px] overflow-hidden ${t.card}`}
+                style={{ width: "100%", aspectRatio: "4/5" }}
               >
-                <div className="relative z-10 flex flex-col h-full p-8">
+                <div className={`relative z-10 flex flex-col h-full p-8 ${cardFont}`}>
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold tracking-[0.3em] uppercase text-purple-400">
+                    <span className={`text-xs font-bold tracking-[0.3em] uppercase ${t.num}`}>
                       {String(i + 1).padStart(2, "0")} / {slides.length.toString().padStart(2, "0")}
                     </span>
                     <div className={`w-2.5 h-2.5 rounded-full ${t.dot}`} />
@@ -487,7 +501,7 @@ export default function Home() {
                     />
                   </div>
 
-                  <div className="flex items-center gap-2 pt-4 border-t border-white/10">
+                  <div className={`flex items-center gap-2 pt-4 border-t ${t.isLight ? "border-black/10" : "border-white/10"}`}>
                     {userAvatar ? (
                       <img src={userAvatar} className="w-6 h-6 rounded-full object-cover" />
                     ) : (
@@ -495,11 +509,11 @@ export default function Home() {
                         {userName[0]}
                       </div>
                     )}
-                    <span className="text-xs text-white/40">{userName}</span>
+                    <span className={`text-xs ${t.isLight ? "text-black/40" : "text-white/40"}`}>{userName}</span>
                     {isPro ? (
-                      <span className="ml-auto text-[10px] text-white/20 font-medium tracking-widest uppercase">CarouselAI</span>
+                      <span className={`ml-auto text-[10px] font-medium tracking-widest uppercase ${t.isLight ? "text-black/20" : "text-white/20"}`}>CarouselAI</span>
                     ) : (
-                      <span className="ml-auto text-[10px] font-bold tracking-wide uppercase bg-white/10 text-white/70 px-2 py-1 rounded-full border border-white/20">
+                      <span className={`ml-auto text-[10px] font-bold tracking-wide uppercase px-2 py-1 rounded-full border ${t.isLight ? "bg-black/5 text-black/60 border-black/10" : "bg-white/10 text-white/70 border-white/20"}`}>
                         Made with CarouselAI
                       </span>
                     )}
@@ -508,7 +522,7 @@ export default function Home() {
                   <button
                     data-pdf-hide
                     onClick={() => regenerateSlide(i)}
-                    className="absolute top-3 left-1/2 -translate-x-1/2 text-[10px] text-white/40 hover:text-white transition bg-white/5 hover:bg-white/10 px-3 py-1 rounded-full border border-white/10"
+                    className={`absolute top-3 left-1/2 -translate-x-1/2 text-[10px] transition px-3 py-1 rounded-full border ${t.isLight ? "text-black/40 hover:text-black bg-black/5 hover:bg-black/10 border-black/10" : "text-white/40 hover:text-white bg-white/5 hover:bg-white/10 border-white/10"}`}
                   >
                     regenerate
                   </button>
