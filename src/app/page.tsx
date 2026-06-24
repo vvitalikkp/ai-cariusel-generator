@@ -226,10 +226,13 @@ export default function Home() {
     return;
   }
 
+  const PAGE_W = 540;
+  const PAGE_H = 675;
+
   const pdf = new jsPDF({
     orientation: "portrait",
     unit: "px",
-    format: [1080, 1350],
+    format: [PAGE_W, PAGE_H],
   });
 
   for (let i = 0; i < slides.length; i++) {
@@ -279,7 +282,7 @@ export default function Home() {
     if (btn) btn.style.display = "";
 
     if (i > 0) pdf.addPage();
-    pdf.addImage(dataUrl, "PNG", 0, 0, 1080, 1350);
+    pdf.addImage(dataUrl, "PNG", 0, 0, PAGE_W, PAGE_H);
   }
 
   pdf.save("carousel.pdf");
