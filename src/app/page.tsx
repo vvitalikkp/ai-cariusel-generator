@@ -69,6 +69,9 @@ const TEMPLATES = {
 
 type TemplateKey = keyof typeof TEMPLATES;
 
+const TONES = ["Storytelling", "Authority", "Contrarian", "Data-Driven"] as const;
+type ToneKey = (typeof TONES)[number];
+
 interface Slide {
   title: string;
   description: string;
@@ -78,6 +81,7 @@ interface Slide {
 export default function Home() {
   const [idea, setIdea] = useState("");
   const [style, setStyle] = useState<TemplateKey>("Viral");
+  const [tone, setTone] = useState<ToneKey>("Authority");
   const [slides, setSlides] = useState<Slide[]>([]);
   const [loading, setLoading] = useState(false);
   const [linkedInPost, setLinkedInPost] = useState("")
@@ -126,7 +130,7 @@ export default function Home() {
       const res = await fetch("/api/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ idea, style, email: session?.user?.email }),
+        body: JSON.stringify({ idea, style, tone, email: session?.user?.email }),
       });
       const data = await res.json();
       if (data.error === "limit_reached") {
@@ -154,7 +158,7 @@ export default function Home() {
       const res = await fetch("/api/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ idea, style }),
+        body: JSON.stringify({ idea, style, tone }),
       });
       const data = await res.json();
       if (data.slides?.length > 0) {
@@ -192,7 +196,7 @@ export default function Home() {
     setLoadingPost(false)
   }
 
-  async function handleUpgrade(plan: "pro" | "pro_plus" = "pro") {
+  async function handleUpgrade(plan: "pro_monthly" | "pro_annual" = "pro_monthly") {
     if (!session?.user?.email) {
       alert("Please sign in first to upgrade")
       return
@@ -339,6 +343,23 @@ export default function Home() {
               ))}
             </div>
 
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="text-xs text-zinc-500 uppercase tracking-wider mr-1">Tone:</span>
+              {TONES.map((item) => (
+                <button
+                  key={item}
+                  onClick={() => setTone(item)}
+                  className={`px-4 py-1.5 rounded-full border transition-all duration-200 text-xs ${
+                    tone === item
+                      ? "bg-fuchsia-600 border-fuchsia-500 text-white"
+                      : "bg-white/5 border-white/10 text-zinc-400 hover:border-fuchsia-500/40"
+                  }`}
+                >
+                  {item}
+                </button>
+              ))}
+            </div>
+
             <div className="flex gap-3">
               <textarea
                 placeholder="Paste your text, tweet, article or just an idea..."
@@ -475,7 +496,13 @@ export default function Home() {
                       </div>
                     )}
                     <span className="text-xs text-white/40">{userName}</span>
-                    <span className="ml-auto text-[10px] text-white/20 font-medium tracking-widest uppercase">CarouselAI</span>
+                    {isPro ? (
+                      <span className="ml-auto text-[10px] text-white/20 font-medium tracking-widest uppercase">CarouselAI</span>
+                    ) : (
+                      <span className="ml-auto text-[10px] font-bold tracking-wide uppercase bg-white/10 text-white/70 px-2 py-1 rounded-full border border-white/20">
+                        Made with CarouselAI
+                      </span>
+                    )}
                   </div>
 
                   <button
@@ -586,7 +613,7 @@ export default function Home() {
             </div>
           </div>
           <div className="bg-white/5 border border-white/10 rounded-[24px] p-6">
-            <p className="text-zinc-300 text-sm mb-6">"My engagement went up 3x after I started using AI carousels. Best $49 I ever spent."</p>
+            <p className="text-zinc-300 text-sm mb-6">"My engagement went up 3x after I started using AI carousels. Best $24/month I spend on my brand."</p>
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-cyan-600 flex items-center justify-center font-bold">D</div>
               <div><p className="font-bold text-sm">David N.</p><p className="text-zinc-500 text-xs">Marketing Director</p></div>
@@ -598,21 +625,20 @@ export default function Home() {
       <section className="relative z-10 max-w-6xl mx-auto py-32 px-6">
         <div className="text-center mb-16">
           <p className="text-pink-400 uppercase tracking-[0.3em] text-sm mb-4">Pricing</p>
-          <h2 className="text-5xl font-black mb-4">Pay once.<br />Use forever.</h2>
-          <p className="text-zinc-400">No subscriptions. No hidden fees. Upgrade when you're ready.</p>
+          <h2 className="text-5xl font-black mb-4">Simple pricing<br />for creators</h2>
+          <p className="text-zinc-400">Start free. Upgrade when you're ready to remove the watermark.</p>
         </div>
-        <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+        <div className="grid md:grid-cols-2 gap-6 max-w-3xl mx-auto">
           <div className="bg-white/5 border border-white/10 rounded-[32px] p-8 backdrop-blur-xl flex flex-col">
             <h3 className="text-xl font-bold mb-2">Free</h3>
-            <p className="text-zinc-500 text-sm mb-6">Try before you buy</p>
+            <p className="text-zinc-500 text-sm mb-6">Try it out every month</p>
             <p className="text-5xl font-black mb-1">$0</p>
             <p className="text-zinc-600 text-sm mb-8">forever</p>
             <ul className="space-y-3 text-zinc-300 mb-8 flex-1">
-              <li className="flex items-center gap-2"><span className="text-green-400">✓</span> 3 carousels total</li>
+              <li className="flex items-center gap-2"><span className="text-green-400">✓</span> 3 carousels / month</li>
               <li className="flex items-center gap-2"><span className="text-green-400">✓</span> PNG export</li>
-              <li className="flex items-center gap-2"><span className="text-green-400">✓</span> Basic templates</li>
+              <li className="flex items-center gap-2"><span className="text-green-400">✓</span> All templates &amp; tones</li>
               <li className="flex items-center gap-2 text-zinc-600"><span>✗</span> PDF export</li>
-              <li className="flex items-center gap-2 text-zinc-600"><span>✗</span> LinkedIn Post generator</li>
               <li className="flex items-center gap-2 text-zinc-600"><span>✗</span> Watermark removal</li>
             </ul>
             <button className="w-full py-4 rounded-2xl bg-white/10 hover:bg-white/20 transition font-bold">Start Free</button>
@@ -621,40 +647,24 @@ export default function Home() {
           <div className="relative bg-gradient-to-br from-fuchsia-600/30 to-purple-600/20 border border-fuchsia-500/40 rounded-[32px] p-8 shadow-[0_0_60px_rgba(217,70,239,0.25)] flex flex-col">
             <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-fuchsia-500 text-white text-xs font-black px-4 py-1.5 rounded-full uppercase tracking-widest whitespace-nowrap">BEST VALUE</div>
             <h3 className="text-xl font-bold mb-2">Pro</h3>
-            <p className="text-zinc-400 text-sm mb-6">One-time payment</p>
-            <p className="text-5xl font-black mb-1">$49</p>
-            <p className="text-zinc-400 text-sm mb-8">pay once, yours forever</p>
-            <ul className="space-y-3 text-zinc-200 mb-8 flex-1">
-              <li className="flex items-center gap-2"><span className="text-green-400">✓</span> 50 carousels</li>
-              <li className="flex items-center gap-2"><span className="text-green-400">✓</span> PNG + PDF export</li>
-              <li className="flex items-center gap-2"><span className="text-green-400">✓</span> All templates</li>
-              <li className="flex items-center gap-2"><span className="text-green-400">✓</span> LinkedIn Post generator</li>
-              <li className="flex items-center gap-2"><span className="text-green-400">✓</span> No watermark</li>
-              <li className="flex items-center gap-2 text-zinc-600"><span>✗</span> Priority support</li>
-            </ul>
-            <button onClick={() => handleUpgrade("pro")} className="w-full py-4 rounded-2xl bg-fuchsia-500 hover:bg-fuchsia-400 transition font-bold shadow-[0_0_30px_rgba(217,70,239,0.4)]">Get Pro — $49</button>
-          </div>
-
-          <div className="bg-white/5 border border-purple-500/30 rounded-[32px] p-8 backdrop-blur-xl flex flex-col">
-            <h3 className="text-xl font-bold mb-2">Pro+</h3>
-            <p className="text-zinc-500 text-sm mb-6">For power users</p>
+            <p className="text-zinc-400 text-sm mb-6">For creators who post often</p>
             <div className="flex items-end gap-1 mb-1">
-              <p className="text-5xl font-black">$19</p>
+              <p className="text-5xl font-black">$24</p>
               <p className="text-zinc-400 text-sm mb-2">/month</p>
             </div>
-            <p className="text-zinc-600 text-sm mb-8">cancel anytime</p>
-            <ul className="space-y-3 text-zinc-300 mb-8 flex-1">
+            <p className="text-zinc-400 text-sm mb-8">or $19/mo billed annually</p>
+            <ul className="space-y-3 text-zinc-200 mb-8 flex-1">
               <li className="flex items-center gap-2"><span className="text-green-400">✓</span> Unlimited carousels</li>
               <li className="flex items-center gap-2"><span className="text-green-400">✓</span> PNG + PDF export</li>
-              <li className="flex items-center gap-2"><span className="text-green-400">✓</span> All templates</li>
+              <li className="flex items-center gap-2"><span className="text-green-400">✓</span> All templates &amp; tones</li>
               <li className="flex items-center gap-2"><span className="text-green-400">✓</span> LinkedIn Post generator</li>
               <li className="flex items-center gap-2"><span className="text-green-400">✓</span> No watermark</li>
-              <li className="flex items-center gap-2"><span className="text-green-400">✓</span> Priority support</li>
             </ul>
-            <button onClick={() => handleUpgrade("pro_plus")} className="w-full py-4 rounded-2xl bg-purple-600 hover:bg-purple-500 transition font-bold">Get Pro+ — $19/mo</button>
+            <button onClick={() => handleUpgrade("pro_monthly")} className="w-full py-4 rounded-2xl bg-fuchsia-500 hover:bg-fuchsia-400 transition font-bold shadow-[0_0_30px_rgba(217,70,239,0.4)] mb-2">Get Pro — $24/mo</button>
+            <button onClick={() => handleUpgrade("pro_annual")} className="w-full py-2 text-sm text-fuchsia-300 hover:text-fuchsia-200 transition">Get annual — $19/mo billed yearly</button>
           </div>
         </div>
-        <p className="text-center text-zinc-600 text-sm mt-10">🔒 Secure payment via Stripe · 30-day money-back guarantee</p>
+        <p className="text-center text-zinc-600 text-sm mt-10">🔒 Secure payment via Stripe · Cancel anytime</p>
       </section>
 
       {showSuccess && (
@@ -673,8 +683,8 @@ export default function Home() {
           <div className="bg-zinc-900 border border-purple-500/30 rounded-[32px] p-10 max-w-md text-center mx-4">
             <div className="text-5xl mb-4">🚀</div>
             <h2 className="text-3xl font-black mb-3">Upgrade to Pro</h2>
-            <p className="text-zinc-400 mb-8">Get 50 carousels + PDF export for just $49 one-time, or go unlimited with Pro+ at $19/month.</p>
-            <button onClick={() => handleUpgrade("pro")} className="w-full py-4 rounded-2xl bg-fuchsia-500 hover:bg-fuchsia-400 transition font-bold text-lg mb-3">Upgrade to Pro — $49</button>
+            <p className="text-zinc-400 mb-8">Get unlimited carousels, PDF export, and no watermark for $24/month — or $19/mo billed annually.</p>
+            <button onClick={() => handleUpgrade("pro_monthly")} className="w-full py-4 rounded-2xl bg-fuchsia-500 hover:bg-fuchsia-400 transition font-bold text-lg mb-3">Upgrade to Pro — $24/mo</button>
             <button onClick={() => setShowPaywall(false)} className="text-zinc-500 text-sm hover:text-white transition">Maybe later</button>
           </div>
         </div>

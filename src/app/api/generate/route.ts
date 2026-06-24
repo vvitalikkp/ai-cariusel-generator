@@ -3,7 +3,13 @@ import OpenAI from "openai"
 import { supabase } from "@/lib/supabase"
 
 const FREE_LIMIT = 3
-const PRO_LIMIT = 50
+
+const TONE_PRESETS: Record<string, string> = {
+  Storytelling: "Write in a first-person, narrative voice. Use a personal anecdote or relatable journey arc, with vulnerability and concrete moments — make it feel like a real story, not a lecture.",
+  Authority: "Write like a confident expert teaching from experience. Use clear, declarative statements and named frameworks. Establish credibility through specificity, not bragging.",
+  Contrarian: "Open by stating what most people believe or were told to do, then flip it. Be provocative and direct, and back the contrarian claim with a concrete reason.",
+  "Data-Driven": "Lead with numbers, percentages, or concrete evidence in nearly every slide. Make claims feel proven with specific figures rather than vague assertions.",
+}
 
 export async function POST(req: Request) {
   try {
@@ -15,28 +21,31 @@ export async function POST(req: Request) {
 
     const openai = new OpenAI({ apiKey })
     const body = await req.json()
-    const { idea, style, email } = body
+    const { idea, style, tone, email } = body
+    const toneInstruction = TONE_PRESETS[tone] || TONE_PRESETS.Authority
+
+    let monthlyCount = 0
+    let isPro = false
 
     if (email) {
       const { data: row } = await supabase
         .from("generation_counts")
-        .select("count, is_pro, plan")
+        .select("count, is_pro, updated_at")
         .eq("email", email)
         .single()
 
-      const isPro = row?.is_pro || false
-      const plan = row?.plan || "free"
-      const count = row?.count || 0
+      isPro = row?.is_pro || false
 
-      if (!isPro && count >= FREE_LIMIT) {
+      const lastUpdate = row?.updated_at ? new Date(row.updated_at) : null
+      const now = new Date()
+      const sameMonth = !!lastUpdate &&
+        lastUpdate.getUTCFullYear() === now.getUTCFullYear() &&
+        lastUpdate.getUTCMonth() === now.getUTCMonth()
+      monthlyCount = sameMonth ? (row?.count || 0) : 0
+
+      if (!isPro && monthlyCount >= FREE_LIMIT) {
         return NextResponse.json({ error: "limit_reached" })
       }
-
-      if (isPro && plan === "pro" && count >= PRO_LIMIT) {
-        return NextResponse.json({ error: "limit_reached" })
-      }
-
-      // pro_plus — unlimited, no check
     }
 
     const response = await openai.chat.completions.create({
@@ -45,6 +54,7 @@ export async function POST(req: Request) {
         {
           role: "user",
           content: `Create a LinkedIn carousel about: ${idea}. Style: ${style}.
+Tone: ${toneInstruction}
 Return ONLY a valid JSON array of exactly 6 slides. Each slide must have:
 - "title": a short, bold headline (5-10 words max). Punchy and attention-grabbing.
 - "description": 3-4 full sentences (150-250 characters). Be specific, practical, and valuable. Give real insight, not fluff.
@@ -68,10 +78,15 @@ Return ONLY the JSON array, no markdown, no extra text.`,
     const slides = JSON.parse(clean)
 
     if (email) {
-      await supabase.rpc("increment_generation_count", { user_email: email })
+      await supabase
+        .from("generation_counts")
+        .upsert(
+          { email, count: monthlyCount + 1, is_pro: isPro, updated_at: new Date().toISOString() },
+          { onConflict: "email" }
+        )
     }
 
-    return NextResponse.json({ slides })
+    return NextResponse.json({ slides, isPro })
   } catch (e) {
     console.error(e)
     return NextResponse.json({ error: String(e) }, { status: 500 })

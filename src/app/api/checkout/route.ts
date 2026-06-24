@@ -6,51 +6,28 @@ export async function POST(req: Request) {
     const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
     const { email, plan } = await req.json()
 
-    // Pro+ subscription
-    if (plan === "pro_plus") {
-      const session = await stripe.checkout.sessions.create({
-        payment_method_types: ["card"],
-        mode: "subscription",
-        customer_email: email,
-        line_items: [
-          {
-            price_data: {
-              currency: "usd",
-              product_data: {
-                name: "CarouselAI Pro+",
-                description: "Unlimited carousels, PDF export, priority support",
-              },
-              unit_amount: 1900,
-              recurring: { interval: "month" },
-            },
-            quantity: 1,
-          },
-        ],
-        success_url: `${process.env.NEXTAUTH_URL}?success=true&plan=pro_plus`,
-        cancel_url: `${process.env.NEXTAUTH_URL}?canceled=true`,
-      })
-      return NextResponse.json({ url: session.url })
-    }
+    const isAnnual = plan === "pro_annual"
 
-    // Pro one-time $49
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
-      mode: "payment",
+      mode: "subscription",
       customer_email: email,
       line_items: [
         {
           price_data: {
             currency: "usd",
             product_data: {
-              name: "CarouselAI Pro",
-              description: "50 carousels, PDF export, no watermark",
+              name: isAnnual ? "CarouselAI Pro (Annual)" : "CarouselAI Pro",
+              description: "Unlimited carousels, PNG + PDF export, no watermark",
             },
-            unit_amount: 4900,
+            unit_amount: isAnnual ? 22800 : 2400,
+            recurring: { interval: isAnnual ? "year" : "month" },
           },
           quantity: 1,
         },
       ],
-      success_url: `${process.env.NEXTAUTH_URL}?success=true&plan=pro`,
+      metadata: { plan: isAnnual ? "pro_annual" : "pro_monthly" },
+      success_url: `${process.env.NEXTAUTH_URL}?success=true&plan=${isAnnual ? "pro_annual" : "pro_monthly"}`,
       cancel_url: `${process.env.NEXTAUTH_URL}?canceled=true`,
     })
 
