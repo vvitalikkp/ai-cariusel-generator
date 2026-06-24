@@ -104,6 +104,29 @@ type TemplateKey = keyof typeof TEMPLATES;
 const TONES = ["Storytelling", "Authority", "Contrarian", "Data-Driven"] as const;
 type ToneKey = (typeof TONES)[number];
 
+const SHOWCASE_EXAMPLES: { style: TemplateKey; title: string; desc: string }[] = [
+  {
+    style: "Viral",
+    title: "I Quit My 9-to-5 to Build This",
+    desc: "Everyone said I was crazy. Six months later, this side project pays my rent. Here's exactly what changed.",
+  },
+  {
+    style: "Stripe",
+    title: "3 Metrics Every Founder Should Track",
+    desc: "Most founders obsess over vanity metrics. These three numbers actually predict whether your startup survives.",
+  },
+  {
+    style: "Linear",
+    title: "Why Most Startups Get Positioning Wrong",
+    desc: "You're not competing on features. You're competing on a single sentence in your customer's head.",
+  },
+  {
+    style: "Gradient",
+    title: "The LinkedIn Algorithm Just Changed",
+    desc: "Reach dropped 40% overnight for most creators. Here's what's actually working in the new feed.",
+  },
+];
+
 interface Slide {
   title: string;
   description: string;
@@ -393,6 +416,7 @@ export default function Home() {
 
             <div className="flex gap-3">
               <textarea
+                id="idea-input"
                 placeholder="Paste your text, tweet, article or just an idea..."
                 value={idea}
                 onChange={(e) => setIdea(e.target.value)}
@@ -574,10 +598,51 @@ export default function Home() {
       )}
 
       {!loading && slides.length === 0 && (
-        <section className="relative z-10 max-w-2xl mx-auto px-6 pb-20 text-center">
-          <p className="text-purple-400 text-sm uppercase tracking-[0.3em] mb-4">Showcase</p>
-          <h2 className="text-4xl font-black mb-4">See what creators generate</h2>
-          <p className="text-zinc-500">Enter a topic above and hit Generate</p>
+        <section className="relative z-10 max-w-4xl mx-auto px-6 pb-20">
+          <div className="text-center mb-12">
+            <p className="text-purple-400 text-sm uppercase tracking-[0.3em] mb-4">Showcase</p>
+            <h2 className="text-4xl font-black mb-4">See what creators generate</h2>
+            <p className="text-zinc-500">Real templates, real output — not mockups</p>
+          </div>
+          <div className="grid sm:grid-cols-2 gap-5">
+            {SHOWCASE_EXAMPLES.map((ex, i) => {
+              const et = TEMPLATES[ex.style];
+              return (
+                <div
+                  key={i}
+                  className={`relative rounded-[24px] overflow-hidden ${et.card}`}
+                  style={{ aspectRatio: "4/5" }}
+                >
+                  <div className="relative z-10 flex flex-col h-full p-7">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className={`text-[10px] font-bold uppercase tracking-widest ${et.isLight ? "text-black/30" : "text-white/30"}`}>
+                        {ex.style}
+                      </span>
+                      <div className={`w-2 h-2 rounded-full ${et.dot}`} />
+                    </div>
+                    <div className="flex-1 flex flex-col justify-center gap-3">
+                      <p className={`leading-tight ${et.title}`}>{ex.title}</p>
+                      <p className={`leading-relaxed text-xs ${et.desc}`}>{ex.desc}</p>
+                    </div>
+                    <span className={`text-[9px] font-bold uppercase tracking-wide self-end px-2 py-1 rounded-full ${et.isLight ? "bg-black/5 text-black/50" : "bg-white/10 text-white/50"}`}>
+                      Made with CarouselAI
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+          <div className="text-center mt-10">
+            <button
+              onClick={() => {
+                window.scrollTo({ top: 0, behavior: "smooth" });
+                document.getElementById("idea-input")?.focus();
+              }}
+              className="px-8 py-4 rounded-2xl bg-purple-600 hover:bg-purple-500 transition font-bold"
+            >
+              Try it yourself ↑
+            </button>
+          </div>
         </section>
       )}
 
