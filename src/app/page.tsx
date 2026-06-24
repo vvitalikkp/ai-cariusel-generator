@@ -62,9 +62,8 @@ export default function Home() {
       <nav className="relative z-20 flex items-center justify-between px-8 py-6 max-w-7xl mx-auto">
         <div className="text-xl font-black tracking-tight">CarouselAI</div>
         <div className="flex items-center gap-8 text-sm text-zinc-400">
-          <button className="hover:text-white transition">Features</button>
-          <button className="hover:text-white transition">Pricing</button>
-          <button className="hover:text-white transition">Github</button>
+          <a href="#how-it-works" className="hover:text-white transition">Features</a>
+          <a href="#pricing" className="hover:text-white transition">Pricing</a>
           {isPro && <span className="px-3 py-1 rounded-full bg-fuchsia-500/20 border border-fuchsia-500/40 text-fuchsia-300 text-xs font-bold">PRO</span>}
           <SignInButton />
           <Link href="/create" className="bg-purple-600 hover:bg-purple-500 text-white px-5 py-2 rounded-lg text-sm font-bold transition">
@@ -177,7 +176,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="relative z-10 max-w-4xl mx-auto py-20 px-6">
+      <section id="how-it-works" className="relative z-10 max-w-4xl mx-auto py-20 px-6">
         <div className="text-center mb-16">
           <p className="text-purple-400 uppercase tracking-[0.3em] text-sm mb-4">How it works</p>
           <h2 className="text-4xl font-black mb-4">3 steps to viral content</h2>
@@ -232,7 +231,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="relative z-10 max-w-6xl mx-auto py-32 px-6">
+      <section id="pricing" className="relative z-10 max-w-6xl mx-auto py-32 px-6">
         <div className="text-center mb-16">
           <p className="text-pink-400 uppercase tracking-[0.3em] text-sm mb-4">Pricing</p>
           <h2 className="text-5xl font-black mb-4">Simple pricing<br />for creators</h2>
