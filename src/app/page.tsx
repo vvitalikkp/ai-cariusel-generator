@@ -276,6 +276,15 @@ export default function Home() {
         <p className="text-center text-zinc-600 text-sm mt-10">🔒 Secure payment via Stripe · Cancel anytime</p>
       </section>
 
+      <footer className="relative z-10 max-w-7xl mx-auto px-6 py-10 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-zinc-500">
+        <span>© 2026 CarouselAI</span>
+        <div className="flex items-center gap-6">
+          <Link href="/privacy" className="hover:text-white transition">Privacy Policy</Link>
+          <Link href="/terms" className="hover:text-white transition">Terms of Service</Link>
+          <a href="mailto:22vp222.0@gmail.com" className="hover:text-white transition">Contact</a>
+        </div>
+      </footer>
+
       {showSuccess && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center">
           <div className="bg-zinc-900 border border-green-500/30 rounded-[32px] p-10 max-w-md text-center mx-4">
