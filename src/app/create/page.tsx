@@ -37,6 +37,10 @@ export default function Create() {
   const [showPaywall, setShowPaywall] = useState(false);
   const [isPro, setIsPro] = useState(false);
   const [showIdeaBank, setShowIdeaBank] = useState(false);
+  const [showUrlImport, setShowUrlImport] = useState(false);
+  const [importUrl, setImportUrl] = useState("");
+  const [importing, setImporting] = useState(false);
+  const [importError, setImportError] = useState("");
   const [tourStep, setTourStep] = useState(0);
   const [tourRect, setTourRect] = useState<DOMRect | null>(null);
   const t = TEMPLATES[style];
@@ -82,6 +86,36 @@ export default function Create() {
     }
     checkPro();
   }, [session]);
+
+  async function importFromUrl() {
+    if (!importUrl.trim()) return;
+    setImporting(true);
+    setImportError("");
+    try {
+      const res = await fetch("/api/fetch-url", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url: importUrl.trim() }),
+      });
+      const data = await res.json();
+      if (data.error === "invalid_url") {
+        setImportError("That doesn't look like a valid URL.");
+      } else if (data.error === "no_content") {
+        setImportError("Couldn't find readable text on that page.");
+      } else if (data.error === "fetch_failed") {
+        setImportError("Couldn't reach that page. Try a different link.");
+      } else if (data.text) {
+        setIdea(data.text);
+        setShowUrlImport(false);
+        setImportUrl("");
+        document.getElementById("idea-input")?.focus();
+      }
+    } catch (e) {
+      console.error(e);
+      setImportError("Something went wrong. Try again.");
+    }
+    setImporting(false);
+  }
 
   async function generateSlides() {
     if (!idea.trim()) return;
@@ -364,12 +398,19 @@ export default function Create() {
           </div>
 
           <div id="tour-idea" className={`rounded-2xl transition p-2 ${tourStep === 3 ? "relative z-50 bg-black ring-2 ring-fuchsia-500 ring-offset-4 ring-offset-black" : ""}`}>
-            <div className="text-center">
+            <div className="flex items-center justify-center gap-4">
               <button
-                onClick={() => setShowIdeaBank((v) => !v)}
+                onClick={() => { setShowIdeaBank((v) => !v); setShowUrlImport(false); }}
                 className="text-sm text-zinc-400 hover:text-white transition"
               >
                 💡 Need an idea? {showIdeaBank ? "Hide" : "Browse idea bank"}
+              </button>
+              <span className="text-zinc-700">·</span>
+              <button
+                onClick={() => { setShowUrlImport((v) => !v); setShowIdeaBank(false); setImportError(""); }}
+                className="text-sm text-zinc-400 hover:text-white transition"
+              >
+                🔗 {showUrlImport ? "Hide" : "Import from URL"}
               </button>
             </div>
 
@@ -389,6 +430,29 @@ export default function Create() {
                     {item.idea}
                   </button>
                 ))}
+              </div>
+            )}
+
+            {showUrlImport && (
+              <div className="max-w-md mx-auto mt-4">
+                <div className="flex gap-2">
+                  <input
+                    type="url"
+                    value={importUrl}
+                    onChange={(e) => setImportUrl(e.target.value)}
+                    onKeyDown={(e) => { if (e.key === "Enter") importFromUrl(); }}
+                    placeholder="https://example.com/article-or-tweet"
+                    className="flex-1 px-4 py-2 rounded-full bg-white/5 border border-white/10 outline-none text-sm focus:border-purple-500 transition"
+                  />
+                  <button
+                    onClick={importFromUrl}
+                    disabled={importing || !importUrl.trim()}
+                    className="px-4 py-2 rounded-full bg-purple-600 hover:bg-purple-500 disabled:opacity-50 transition text-sm font-bold whitespace-nowrap"
+                  >
+                    {importing ? "Fetching..." : "Fetch"}
+                  </button>
+                </div>
+                {importError && <p className="text-xs text-red-400 mt-2 text-center">{importError}</p>}
               </div>
             )}
           </div>
