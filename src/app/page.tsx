@@ -201,36 +201,6 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="relative z-10 max-w-5xl mx-auto py-20 px-6">
-        <div className="text-center mb-12">
-          <p className="text-purple-400 uppercase tracking-[0.3em] text-sm mb-4">Testimonials</p>
-          <h2 className="text-4xl font-black mb-4">Creators love it</h2>
-        </div>
-        <div className="grid md:grid-cols-3 gap-6">
-          <div className="bg-white/5 border border-white/10 rounded-[24px] p-6">
-            <p className="text-zinc-300 text-sm mb-6">&ldquo;I went from spending 2 hours on a carousel to 2 minutes. This tool is insane.&rdquo;</p>
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-purple-600 flex items-center justify-center font-bold">A</div>
-              <div><p className="font-bold text-sm">Alex K.</p><p className="text-zinc-500 text-xs">LinkedIn Creator, 45k followers</p></div>
-            </div>
-          </div>
-          <div className="bg-white/5 border border-purple-500/30 rounded-[24px] p-6">
-            <p className="text-zinc-300 text-sm mb-6">&ldquo;The Hook to Problem to Solution structure is exactly what top LinkedIn posts use. Game changer.&rdquo;</p>
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-fuchsia-600 flex items-center justify-center font-bold">M</div>
-              <div><p className="font-bold text-sm">Maria S.</p><p className="text-zinc-500 text-xs">Startup Founder</p></div>
-            </div>
-          </div>
-          <div className="bg-white/5 border border-white/10 rounded-[24px] p-6">
-            <p className="text-zinc-300 text-sm mb-6">&ldquo;My engagement went up 3x after I started using AI carousels. Best $24/month I spend on my brand.&rdquo;</p>
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-cyan-600 flex items-center justify-center font-bold">D</div>
-              <div><p className="font-bold text-sm">David N.</p><p className="text-zinc-500 text-xs">Marketing Director</p></div>
-            </div>
-          </div>
-        </div>
-      </section>
-
       <section id="pricing" className="relative z-10 max-w-6xl mx-auto py-32 px-6">
         <div className="text-center mb-16">
           <p className="text-pink-400 uppercase tracking-[0.3em] text-sm mb-4">Pricing</p>
