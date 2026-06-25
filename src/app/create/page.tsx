@@ -8,7 +8,7 @@ import JSZip from "jszip";
 import { saveAs } from "file-saver";
 import { SignInButton } from "../components/SignInButton";
 import jsPDF from "jspdf";
-import { TEMPLATES, TONES, type TemplateKey, type ToneKey } from "@/lib/templates";
+import { TEMPLATES, TONES, IDEA_BANK, type TemplateKey, type ToneKey } from "@/lib/templates";
 
 interface Slide {
   title: string;
@@ -29,6 +29,7 @@ export default function Create() {
   const [userAvatar, setUserAvatar] = useState<string | null>(null);
   const [showPaywall, setShowPaywall] = useState(false);
   const [isPro, setIsPro] = useState(false);
+  const [showIdeaBank, setShowIdeaBank] = useState(false);
   const t = TEMPLATES[style];
   const { data: session } = useSession();
 
@@ -307,6 +308,34 @@ export default function Create() {
               </button>
             ))}
           </div>
+
+          <div className="text-center">
+            <button
+              onClick={() => setShowIdeaBank((v) => !v)}
+              className="text-sm text-zinc-400 hover:text-white transition"
+            >
+              💡 Need an idea? {showIdeaBank ? "Hide" : "Browse idea bank"}
+            </button>
+          </div>
+
+          {showIdeaBank && (
+            <div className="flex flex-wrap gap-2 justify-center max-w-2xl mx-auto">
+              {IDEA_BANK.map((item, i) => (
+                <button
+                  key={i}
+                  onClick={() => {
+                    setIdea(item.idea);
+                    setShowIdeaBank(false);
+                    document.getElementById("idea-input")?.focus();
+                  }}
+                  className="text-xs px-3 py-2 rounded-full border border-white/10 bg-white/5 text-zinc-300 hover:border-purple-500/40 hover:text-white transition text-left"
+                >
+                  <span className="text-purple-400 font-bold mr-1">{item.category}:</span>
+                  {item.idea}
+                </button>
+              ))}
+            </div>
+          )}
 
           <div className="flex gap-3">
             <textarea

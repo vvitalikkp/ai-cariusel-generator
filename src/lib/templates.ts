@@ -116,3 +116,21 @@ export const SHOWCASE_EXAMPLES: { style: TemplateKey; title: string; desc: strin
     desc: "Reach dropped 40% overnight for most creators. Here's what's actually working in the new feed.",
   },
 ];
+
+export const IDEA_BANK: { category: string; idea: string }[] = [
+  { category: "Career", idea: "How I negotiated a 30% raise without changing jobs" },
+  { category: "Career", idea: "The interview answer that got me hired everywhere I applied" },
+  { category: "Career", idea: "Why I stopped chasing promotions and started building skills" },
+  { category: "Founder", idea: "The biggest mistake I made in my first year as a founder" },
+  { category: "Founder", idea: "How we got our first 100 customers without spending on ads" },
+  { category: "Founder", idea: "Why I turned down funding and bootstrapped instead" },
+  { category: "Productivity", idea: "The 2-hour rule that doubled my output" },
+  { category: "Productivity", idea: "Why multitasking was making me less productive" },
+  { category: "Productivity", idea: "How I cut my meetings in half and got more done" },
+  { category: "Marketing", idea: "Why your LinkedIn posts aren't getting engagement" },
+  { category: "Marketing", idea: "The content framework that 10x'd my reach in 30 days" },
+  { category: "Marketing", idea: "What I learned from analyzing 100 viral LinkedIn posts" },
+  { category: "Leadership", idea: "The management mistake that cost me my best employee" },
+  { category: "Leadership", idea: "How I learned to give feedback people actually act on" },
+  { category: "Leadership", idea: "Why I stopped trying to be liked and started leading" },
+];
