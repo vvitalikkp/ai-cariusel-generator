@@ -16,6 +16,13 @@ interface Slide {
   type: string;
 }
 
+const TOUR_STEPS = [
+  { target: "tour-style", title: "Pick a style", desc: "11 templates, each with its own look — pick one that fits your brand." },
+  { target: "tour-tone", title: "Pick a tone", desc: "Controls the AI's writing voice: Storytelling, Authority, Contrarian, or Data-Driven." },
+  { target: "tour-idea", title: "Type your idea", desc: "Paste a tweet, article, or just type an idea. No idea? Grab one from the idea bank." },
+  { target: "tour-generate", title: "Generate", desc: "Click Generate and get 6 polished, editable slides in seconds." },
+];
+
 export default function Create() {
   const [idea, setIdea] = useState("");
   const [style, setStyle] = useState<TemplateKey>("Viral");
@@ -30,8 +37,33 @@ export default function Create() {
   const [showPaywall, setShowPaywall] = useState(false);
   const [isPro, setIsPro] = useState(false);
   const [showIdeaBank, setShowIdeaBank] = useState(false);
+  const [tourStep, setTourStep] = useState(0);
+  const [tourRect, setTourRect] = useState<DOMRect | null>(null);
   const t = TEMPLATES[style];
   const { data: session } = useSession();
+
+  useEffect(() => {
+    if (!localStorage.getItem("carouselai_tour_seen")) setTourStep(1);
+  }, []);
+
+  useEffect(() => {
+    if (tourStep < 1) return;
+    const el = document.getElementById(TOUR_STEPS[tourStep - 1].target);
+    if (!el) return;
+    el.scrollIntoView({ behavior: "smooth", block: "center" });
+    const t = setTimeout(() => setTourRect(el.getBoundingClientRect()), 350);
+    return () => clearTimeout(t);
+  }, [tourStep]);
+
+  function endTour() {
+    setTourStep(0);
+    localStorage.setItem("carouselai_tour_seen", "1");
+  }
+
+  function nextTourStep() {
+    if (tourStep >= TOUR_STEPS.length) endTour();
+    else setTourStep(tourStep + 1);
+  }
 
   useEffect(() => {
     async function checkPro() {
@@ -298,7 +330,7 @@ export default function Create() {
         <h1 className="text-3xl font-black mb-8 text-center">Create your carousel</h1>
 
         <div className="flex flex-col gap-4">
-          <div className="flex gap-3 flex-wrap justify-center">
+          <div id="tour-style" className={`flex gap-3 flex-wrap justify-center rounded-2xl transition p-2 ${tourStep === 1 ? "relative z-50 bg-black ring-2 ring-fuchsia-500 ring-offset-4 ring-offset-black" : ""}`}>
             {(Object.keys(TEMPLATES) as TemplateKey[]).map((item) => (
               <button
                 key={item}
@@ -314,7 +346,7 @@ export default function Create() {
             ))}
           </div>
 
-          <div className="flex items-center justify-center gap-2 flex-wrap">
+          <div id="tour-tone" className={`flex items-center justify-center gap-2 flex-wrap rounded-2xl transition p-2 ${tourStep === 2 ? "relative z-50 bg-black ring-2 ring-fuchsia-500 ring-offset-4 ring-offset-black" : ""}`}>
             <span className="text-xs text-zinc-500 uppercase tracking-wider mr-1">Tone:</span>
             {TONES.map((item) => (
               <button
@@ -331,33 +363,35 @@ export default function Create() {
             ))}
           </div>
 
-          <div className="text-center">
-            <button
-              onClick={() => setShowIdeaBank((v) => !v)}
-              className="text-sm text-zinc-400 hover:text-white transition"
-            >
-              💡 Need an idea? {showIdeaBank ? "Hide" : "Browse idea bank"}
-            </button>
-          </div>
-
-          {showIdeaBank && (
-            <div className="flex flex-wrap gap-2 justify-center max-w-2xl mx-auto">
-              {IDEA_BANK.map((item, i) => (
-                <button
-                  key={i}
-                  onClick={() => {
-                    setIdea(item.idea);
-                    setShowIdeaBank(false);
-                    document.getElementById("idea-input")?.focus();
-                  }}
-                  className="text-xs px-3 py-2 rounded-full border border-white/10 bg-white/5 text-zinc-300 hover:border-purple-500/40 hover:text-white transition text-left"
-                >
-                  <span className="text-purple-400 font-bold mr-1">{item.category}:</span>
-                  {item.idea}
-                </button>
-              ))}
+          <div id="tour-idea" className={`rounded-2xl transition p-2 ${tourStep === 3 ? "relative z-50 bg-black ring-2 ring-fuchsia-500 ring-offset-4 ring-offset-black" : ""}`}>
+            <div className="text-center">
+              <button
+                onClick={() => setShowIdeaBank((v) => !v)}
+                className="text-sm text-zinc-400 hover:text-white transition"
+              >
+                💡 Need an idea? {showIdeaBank ? "Hide" : "Browse idea bank"}
+              </button>
             </div>
-          )}
+
+            {showIdeaBank && (
+              <div className="flex flex-wrap gap-2 justify-center max-w-2xl mx-auto mt-4">
+                {IDEA_BANK.map((item, i) => (
+                  <button
+                    key={i}
+                    onClick={() => {
+                      setIdea(item.idea);
+                      setShowIdeaBank(false);
+                      document.getElementById("idea-input")?.focus();
+                    }}
+                    className="text-xs px-3 py-2 rounded-full border border-white/10 bg-white/5 text-zinc-300 hover:border-purple-500/40 hover:text-white transition text-left"
+                  >
+                    <span className="text-purple-400 font-bold mr-1">{item.category}:</span>
+                    {item.idea}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
 
           <div className="flex gap-3">
             <textarea
@@ -368,9 +402,10 @@ export default function Create() {
               className="flex-1 px-6 py-4 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-xl outline-none text-base focus:border-purple-500 transition resize-none h-32"
             />
             <button
+              id="tour-generate"
               onClick={generateSlides}
               disabled={loading || !idea.trim()}
-              className="px-8 py-4 rounded-2xl bg-purple-600 hover:bg-purple-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all font-bold shadow-[0_0_30px_rgba(168,85,247,0.4)] whitespace-nowrap"
+              className={`px-8 py-4 rounded-2xl bg-purple-600 hover:bg-purple-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all font-bold shadow-[0_0_30px_rgba(168,85,247,0.4)] whitespace-nowrap ${tourStep === 4 ? "relative z-50 ring-2 ring-fuchsia-500 ring-offset-4 ring-offset-black" : ""}`}
             >
               {loading ? (
                 <span className="flex items-center gap-2">
@@ -553,6 +588,37 @@ export default function Create() {
             <p className="text-zinc-400 mb-8">Get unlimited carousels, PDF export, and no watermark for $24/month — or $19/mo billed annually.</p>
             <button onClick={() => handleUpgrade("pro_monthly")} className="w-full py-4 rounded-2xl bg-fuchsia-500 hover:bg-fuchsia-400 transition font-bold text-lg mb-3">Upgrade to Pro — $24/mo</button>
             <button onClick={() => setShowPaywall(false)} className="text-zinc-500 text-sm hover:text-white transition">Maybe later</button>
+          </div>
+        </div>
+      )}
+
+      {tourStep > 0 && tourRect && (
+        <div className="fixed inset-0 z-40 bg-black/70" onClick={endTour} />
+      )}
+
+      {tourStep > 0 && tourRect && (
+        <div
+          className="fixed z-50 w-80 bg-zinc-900 border border-fuchsia-500/40 rounded-2xl p-5 shadow-[0_0_40px_rgba(217,70,239,0.25)]"
+          style={{
+            top: Math.min(tourRect.bottom + 16, window.innerHeight - 200),
+            left: Math.min(Math.max(tourRect.left, 16), window.innerWidth - 336),
+          }}
+        >
+          <p className="text-xs text-fuchsia-400 font-bold uppercase tracking-wider mb-2">
+            Step {tourStep} of {TOUR_STEPS.length}
+          </p>
+          <h3 className="text-lg font-bold mb-1">{TOUR_STEPS[tourStep - 1].title}</h3>
+          <p className="text-sm text-zinc-400 mb-5">{TOUR_STEPS[tourStep - 1].desc}</p>
+          <div className="flex items-center justify-between">
+            <button onClick={endTour} className="text-xs text-zinc-500 hover:text-white transition">Skip tour</button>
+            <div className="flex gap-2">
+              {tourStep > 1 && (
+                <button onClick={() => setTourStep(tourStep - 1)} className="text-xs px-3 py-1.5 rounded-full border border-white/20 hover:border-white/40 transition">Back</button>
+              )}
+              <button onClick={nextTourStep} className="text-xs px-3 py-1.5 rounded-full bg-fuchsia-500 hover:bg-fuchsia-400 transition font-bold">
+                {tourStep === TOUR_STEPS.length ? "Finish" : "Next"}
+              </button>
+            </div>
           </div>
         </div>
       )}
