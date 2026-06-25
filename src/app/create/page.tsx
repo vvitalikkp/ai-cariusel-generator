@@ -176,6 +176,21 @@ export default function Create() {
     else alert("Error: " + JSON.stringify(data));
   }
 
+  async function openBillingPortal() {
+    if (!session?.user?.email) {
+      signIn();
+      return;
+    }
+    const res = await fetch("/api/portal", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: session.user.email }),
+    });
+    const data = await res.json();
+    if (data.url) window.location.href = data.url;
+    else alert("Couldn't open billing portal: " + JSON.stringify(data));
+  }
+
   async function downloadPNG() {
     const zip = new JSZip();
     for (let i = 0; i < slides.length; i++) {
@@ -267,7 +282,14 @@ export default function Create() {
       <nav className="relative z-20 flex items-center justify-between px-8 py-6 max-w-7xl mx-auto">
         <Link href="/" className="text-xl font-black tracking-tight">CarouselAI</Link>
         <div className="flex items-center gap-4">
-          {isPro && <span className="px-3 py-1 rounded-full bg-fuchsia-500/20 border border-fuchsia-500/40 text-fuchsia-300 text-xs font-bold">PRO</span>}
+          {isPro && (
+            <>
+              <span className="px-3 py-1 rounded-full bg-fuchsia-500/20 border border-fuchsia-500/40 text-fuchsia-300 text-xs font-bold">PRO</span>
+              <button onClick={openBillingPortal} className="text-sm text-zinc-400 hover:text-white transition">
+                Manage Billing
+              </button>
+            </>
+          )}
           <SignInButton />
         </div>
       </nav>
