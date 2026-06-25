@@ -52,15 +52,15 @@ export async function POST(req: Request) {
     }
 
     const response = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
+      model: isPro ? "gpt-4o" : "gpt-4o-mini",
       messages: [
         {
           role: "user",
           content: `Create a LinkedIn carousel about: ${idea}. Style: ${style}.
 Tone: ${toneInstruction}
 Return ONLY a valid JSON array of exactly 6 slides. Each slide must have:
-- "title": a short, bold headline (5-10 words max). Punchy and attention-grabbing.
-- "description": 3-4 full sentences (150-250 characters). Be specific, practical, and valuable. Give real insight, not fluff.
+- "title": a short, punchy headline (4-8 words). Declarative, no filler words, no generic phrases like "unlock your potential" or "shift your mindset".
+- "description": 2-3 short, direct sentences (max 180 characters). Concrete and specific — use a named mechanism or a real example instead of vague encouragement. Do not reference "our community", "my page", or any group that may not exist for a solo creator.
 - "type": one of [hook, problem, mistake, solution, framework, cta]
 
 Slide structure:
@@ -69,7 +69,7 @@ Slide structure:
 3. Mistake - the most common mistake people make and why it hurts them
 4. Solution - the key insight or mindset shift that changes everything
 5. Framework - 3 actionable steps anyone can apply today
-6. CTA - compelling call to action with clear next step
+6. CTA - a direct call to action, e.g. asking a question to drive comments, or a concrete next step — not a generic "follow for more"
 
 Return ONLY the JSON array, no markdown, no extra text.`,
         }
