@@ -1,8 +1,37 @@
 import { NextResponse } from "next/server"
 import Stripe from "stripe"
+import { Resend } from "resend"
 import { supabase } from "@/lib/supabase"
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
+const resend = new Resend(process.env.RESEND_API_KEY)
+
+async function sendWelcomeEmail(email: string) {
+  try {
+    await resend.emails.send({
+      from: "CarouselAI <onboarding@resend.dev>",
+      to: email,
+      subject: "Welcome to CarouselAI Pro 🚀",
+      html: `
+        <div style="font-family: -apple-system, sans-serif; max-width: 480px; margin: 0 auto; background: #0a0a0a; color: #fff; padding: 32px; border-radius: 16px;">
+          <p style="color: #c084fc; font-weight: 700; letter-spacing: 2px; font-size: 12px; text-transform: uppercase; margin-bottom: 16px;">CarouselAI</p>
+          <h1 style="font-size: 28px; font-weight: 900; margin: 0 0 16px;">Welcome to Pro 🚀</h1>
+          <p style="color: #a1a1aa; font-size: 15px; line-height: 1.6; margin-bottom: 24px;">
+            Your account is upgraded. Unlimited carousels, PDF export, no watermark, and the LinkedIn Post generator are all unlocked.
+          </p>
+          <a href="https://www.aicarousel.tech/create" style="display: inline-block; background: #c026d3; color: #fff; text-decoration: none; font-weight: 700; padding: 14px 28px; border-radius: 12px;">
+            Start creating →
+          </a>
+          <p style="color: #52525b; font-size: 12px; margin-top: 32px;">
+            Questions? Just reply to this email.
+          </p>
+        </div>
+      `,
+    })
+  } catch (e) {
+    console.error("Failed to send welcome email:", e)
+  }
+}
 
 export async function POST(req: Request) {
   const body = await req.text()
@@ -26,6 +55,8 @@ export async function POST(req: Request) {
       await supabase
         .from("generation_counts")
         .upsert({ email, is_pro: true, plan }, { onConflict: "email" })
+
+      await sendWelcomeEmail(email)
     }
   }
 
