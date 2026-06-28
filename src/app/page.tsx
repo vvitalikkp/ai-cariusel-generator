@@ -59,15 +59,16 @@ export default function Home() {
         <div className="absolute bottom-[-200px] right-[-200px] w-[500px] h-[500px] bg-purple-700/20 rounded-full blur-[140px]" />
       </div>
 
-      <nav className="relative z-20 flex items-center justify-between px-8 py-6 max-w-7xl mx-auto">
-        <div className="text-xl font-black tracking-tight">CarouselAI</div>
-        <div className="flex items-center gap-8 text-sm text-zinc-400">
-          <a href="#how-it-works" className="hover:text-white transition">Features</a>
-          <a href="#pricing" className="hover:text-white transition">Pricing</a>
-          {isPro && <span className="px-3 py-1 rounded-full bg-fuchsia-500/20 border border-fuchsia-500/40 text-fuchsia-300 text-xs font-bold">PRO</span>}
+      <nav className="relative z-20 flex items-center justify-between px-4 sm:px-8 py-4 sm:py-6 max-w-7xl mx-auto gap-2">
+        <div className="text-lg sm:text-xl font-black tracking-tight whitespace-nowrap">CarouselAI</div>
+        <div className="flex items-center gap-2 sm:gap-6 text-sm text-zinc-400 min-w-0">
+          <a href="#how-it-works" className="hidden md:inline hover:text-white transition whitespace-nowrap">Features</a>
+          <a href="#pricing" className="hidden md:inline hover:text-white transition whitespace-nowrap">Pricing</a>
+          {isPro && <span className="hidden sm:inline px-3 py-1 rounded-full bg-fuchsia-500/20 border border-fuchsia-500/40 text-fuchsia-300 text-xs font-bold whitespace-nowrap">PRO</span>}
           <SignInButton />
-          <Link href="/create" className="bg-purple-600 hover:bg-purple-500 text-white px-5 py-2 rounded-lg text-sm font-bold transition">
-            Create Carousel →
+          <Link href="/create" className="bg-purple-600 hover:bg-purple-500 text-white px-3 sm:px-5 py-2 rounded-lg text-sm font-bold transition whitespace-nowrap">
+            <span className="sm:hidden">Create</span>
+            <span className="hidden sm:inline">Create Carousel →</span>
           </Link>
         </div>
       </nav>

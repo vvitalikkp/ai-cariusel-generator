@@ -345,13 +345,13 @@ export default function Create() {
         <div className="absolute bottom-[-200px] right-[-200px] w-[500px] h-[500px] bg-purple-700/20 rounded-full blur-[140px]" />
       </div>
 
-      <nav className="relative z-20 flex items-center justify-between px-8 py-6 max-w-7xl mx-auto">
-        <Link href="/" className="text-xl font-black tracking-tight">CarouselAI</Link>
-        <div className="flex items-center gap-4">
+      <nav className="relative z-20 flex flex-wrap items-center justify-between px-4 sm:px-8 py-4 sm:py-6 max-w-7xl mx-auto gap-2">
+        <Link href="/" className="text-lg sm:text-xl font-black tracking-tight whitespace-nowrap">CarouselAI</Link>
+        <div className="flex items-center gap-2 sm:gap-4 flex-wrap justify-end">
           {isPro && (
             <>
-              <span className="px-3 py-1 rounded-full bg-fuchsia-500/20 border border-fuchsia-500/40 text-fuchsia-300 text-xs font-bold">PRO</span>
-              <button onClick={openBillingPortal} className="text-sm text-zinc-400 hover:text-white transition">
+              <span className="px-2 sm:px-3 py-1 rounded-full bg-fuchsia-500/20 border border-fuchsia-500/40 text-fuchsia-300 text-[10px] sm:text-xs font-bold whitespace-nowrap">PRO</span>
+              <button onClick={openBillingPortal} className="text-xs sm:text-sm text-zinc-400 hover:text-white transition whitespace-nowrap">
                 Manage Billing
               </button>
             </>
