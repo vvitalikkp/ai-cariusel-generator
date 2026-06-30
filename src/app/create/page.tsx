@@ -117,18 +117,12 @@ export default function Create() {
     }
   }
 
-  function isYouTubeUrl(url: string) {
-    return /(?:youtube\.com\/(?:watch|shorts|embed)|youtu\.be\/)/.test(url);
-  }
-
   async function importFromUrl() {
     if (!importUrl.trim()) return;
     setImporting(true);
     setImportError("");
     try {
-      const isYT = isYouTubeUrl(importUrl.trim());
-      const endpoint = isYT ? "/api/fetch-youtube" : "/api/fetch-url";
-      const res = await fetch(endpoint, {
+      const res = await fetch("/api/fetch-url", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ url: importUrl.trim() }),
@@ -136,15 +130,12 @@ export default function Create() {
       const data = await res.json();
       if (data.error === "invalid_url") {
         setImportError("That doesn't look like a valid URL.");
-      } else if (data.error === "no_captions") {
-        setImportError("This video has no captions. Try a video with subtitles enabled.");
       } else if (data.error === "no_content") {
         setImportError("Couldn't find readable text on that page.");
       } else if (data.error === "fetch_failed") {
         setImportError("Couldn't reach that page. Try a different link.");
       } else if (data.text) {
-        const prefix = isYT && data.title ? `${data.title}\n\n` : "";
-        setIdea(prefix + data.text);
+        setIdea(data.text);
         setShowUrlImport(false);
         setImportUrl("");
         document.getElementById("idea-input")?.focus();
@@ -473,30 +464,24 @@ export default function Create() {
             )}
 
             {showUrlImport && (
-              <div className="max-w-lg mx-auto mt-4">
+              <div className="max-w-md mx-auto mt-4">
                 <div className="flex gap-2">
-                  <div className="relative flex-1">
-                    {isYouTubeUrl(importUrl) && (
-                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-red-500 text-xs font-bold">▶ YT</span>
-                    )}
-                    <input
-                      type="url"
-                      value={importUrl}
-                      onChange={(e) => setImportUrl(e.target.value)}
-                      onKeyDown={(e) => { if (e.key === "Enter") importFromUrl(); }}
-                      placeholder="YouTube URL or any article link"
-                      className={`w-full py-2 rounded-full bg-white/5 border border-white/10 outline-none text-sm focus:border-purple-500 transition ${isYouTubeUrl(importUrl) ? "pl-12 pr-4" : "px-4"}`}
-                    />
-                  </div>
+                  <input
+                    type="url"
+                    value={importUrl}
+                    onChange={(e) => setImportUrl(e.target.value)}
+                    onKeyDown={(e) => { if (e.key === "Enter") importFromUrl(); }}
+                    placeholder="https://example.com/article-or-tweet"
+                    className="flex-1 px-4 py-2 rounded-full bg-white/5 border border-white/10 outline-none text-sm focus:border-purple-500 transition"
+                  />
                   <button
                     onClick={importFromUrl}
                     disabled={importing || !importUrl.trim()}
                     className="px-4 py-2 rounded-full bg-purple-600 hover:bg-purple-500 disabled:opacity-50 transition text-sm font-bold whitespace-nowrap"
                   >
-                    {importing ? (isYouTubeUrl(importUrl) ? "Transcribing..." : "Fetching...") : "Import"}
+                    {importing ? "Fetching..." : "Fetch"}
                   </button>
                 </div>
-                <p className="text-xs text-zinc-600 mt-1.5 text-center">Paste a YouTube video, blog post, or article URL</p>
                 {importError && <p className="text-xs text-red-400 mt-2 text-center">{importError}</p>}
               </div>
             )}
