@@ -97,7 +97,7 @@ export default function Home() {
               Paste a tweet, an idea, or an article. Get a polished 6-slide carousel — hook, structure, and design handled by AI.
             </p>
             <div className="flex flex-col gap-2 mb-8 text-sm text-zinc-300">
-              <span className="flex items-center gap-2"><span className="text-green-400">✓</span> 11 premium templates, 4 AI tone presets</span>
+              <span className="flex items-center gap-2"><span className="text-green-400">✓</span> 25 premium templates, 4 AI tone presets</span>
               <span className="flex items-center gap-2"><span className="text-green-400">✓</span> Export to PNG or PDF in one click</span>
               <span className="flex items-center gap-2"><span className="text-green-400">✓</span> Free to try, no credit card required</span>
             </div>
