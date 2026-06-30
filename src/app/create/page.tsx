@@ -17,7 +17,7 @@ interface Slide {
 }
 
 const TOUR_STEPS = [
-  { target: "tour-style", title: "Pick a style", desc: "11 templates, each with its own look — pick one that fits your brand." },
+  { target: "tour-style", title: "Pick a style", desc: "25 templates, each with its own look — pick one that fits your brand." },
   { target: "tour-tone", title: "Pick a tone", desc: "Controls the AI's writing voice: Storytelling, Authority, Contrarian, or Data-Driven." },
   { target: "tour-idea", title: "Type your idea", desc: "Paste a tweet, article, or just type an idea. No idea? Grab one from the idea bank." },
   { target: "tour-generate", title: "Generate", desc: "Click Generate and get 6 polished, editable slides in seconds." },
