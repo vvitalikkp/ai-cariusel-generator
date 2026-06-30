@@ -9,7 +9,7 @@ const TOTAL_SPOTS = 500;
 
 const FEATURES = [
   "Unlimited carousel generations — no monthly cap",
-  "11 premium templates (more added regularly)",
+  "25 premium templates (more added regularly)",
   "4 AI tone presets: Storytelling, Authority, Contrarian, Data-Driven",
   "Export as PNG (ZIP) — post-ready, high resolution",
   "Export as PDF — LinkedIn document carousel format",
@@ -45,7 +45,7 @@ const FAQ = [
 
 export default function LtdPage() {
   return (
-    <Suspense fallback={null}>
+    <Suspense fallback={<div className="min-h-screen bg-[#080808]" />}>
       <LtdPageInner />
     </Suspense>
   );
