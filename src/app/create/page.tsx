@@ -32,6 +32,7 @@ export default function Create() {
   const [linkedInPost, setLinkedInPost] = useState("");
   const [loadingPost, setLoadingPost] = useState(false);
   const [cardFont, setCardFont] = useState("font-sans");
+  const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const [userName, setUserName] = useState("CarouselAI");
   const [userAvatar, setUserAvatar] = useState<string | null>(null);
   const [brandColor, setBrandColor] = useState("");
@@ -44,6 +45,8 @@ export default function Create() {
   const [importUrl, setImportUrl] = useState("");
   const [importing, setImporting] = useState(false);
   const [importError, setImportError] = useState("");
+  const [importingPdf, setImportingPdf] = useState(false);
+  const [pdfError, setPdfError] = useState("");
   const [tourStep, setTourStep] = useState(0);
   const [tourRect, setTourRect] = useState<DOMRect | null>(null);
   const t = TEMPLATES[style];
@@ -51,6 +54,10 @@ export default function Create() {
 
   useEffect(() => {
     if (!localStorage.getItem("carouselai_tour_seen")) setTourStep(1);
+    const savedLogo = localStorage.getItem("carouselai_logo");
+    if (savedLogo) setLogoUrl(savedLogo);
+    const savedFont = localStorage.getItem("carouselai_font");
+    if (savedFont) setCardFont(savedFont);
   }, []);
 
   useEffect(() => {
@@ -110,6 +117,9 @@ export default function Create() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: session.user.email, brandColor, accentColor }),
       });
+      localStorage.setItem("carouselai_font", cardFont);
+      if (logoUrl) localStorage.setItem("carouselai_logo", logoUrl);
+      else localStorage.removeItem("carouselai_logo");
       setBrandSaved(true);
       setTimeout(() => setBrandSaved(false), 2000);
     } catch (e) {
@@ -145,6 +155,26 @@ export default function Create() {
       setImportError("Something went wrong. Try again.");
     }
     setImporting(false);
+  }
+
+  async function importFromPdf(file: File) {
+    setImportingPdf(true);
+    setPdfError("");
+    try {
+      const form = new FormData();
+      form.append("file", file);
+      const res = await fetch("/api/parse-pdf", { method: "POST", body: form });
+      const data = await res.json();
+      if (data.error) {
+        setPdfError(data.error);
+      } else if (data.text) {
+        setIdea(data.text);
+        document.getElementById("idea-input")?.focus();
+      }
+    } catch {
+      setPdfError("Something went wrong. Try again.");
+    }
+    setImportingPdf(false);
   }
 
   async function generateSlides() {
@@ -248,8 +278,8 @@ export default function Create() {
         setLoadingPost(false);
         return;
       }
-      if (data.slides?.[0]?.title) {
-        setLinkedInPost(data.slides[0].title + "\n\n" + data.slides[0].description);
+      if (data.post) {
+        setLinkedInPost(data.post);
       }
     } catch (e) {
       console.error(e);
@@ -442,6 +472,17 @@ export default function Create() {
               >
                 🔗 {showUrlImport ? "Hide" : "Import from URL"}
               </button>
+              <span className="text-zinc-700">·</span>
+              <label className="text-sm text-zinc-400 hover:text-white transition cursor-pointer">
+                {importingPdf ? "Parsing..." : "📄 Upload PDF"}
+                <input
+                  type="file"
+                  accept="application/pdf"
+                  className="hidden"
+                  disabled={importingPdf}
+                  onChange={(e) => { const f = e.target.files?.[0]; if (f) importFromPdf(f); e.target.value = ""; }}
+                />
+              </label>
             </div>
 
             {showIdeaBank && (
@@ -483,6 +524,11 @@ export default function Create() {
                   </button>
                 </div>
                 {importError && <p className="text-xs text-red-400 mt-2 text-center">{importError}</p>}
+              </div>
+            )}
+            {pdfError && (
+              <div className="max-w-md mx-auto mt-2">
+                <p className="text-xs text-red-400 text-center">{pdfError}</p>
               </div>
             )}
           </div>
@@ -530,21 +576,6 @@ export default function Create() {
               </button>
             ))}
           </div>
-          <div className="flex flex-wrap gap-4 justify-center mb-4">
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-zinc-400">Font:</span>
-              {["font-sans", "font-serif", "font-mono"].map((font) => (
-                <button
-                  key={font}
-                  onClick={() => setCardFont(font)}
-                  className={`text-xs px-3 py-1 rounded-full border border-white/20 hover:border-white transition ${cardFont === font ? "bg-white/20" : ""}`}
-                >
-                  {font.replace("font-", "")}
-                </button>
-              ))}
-            </div>
-          </div>
-
           {/* Brand Kit */}
           <div className="flex flex-wrap items-center gap-4 justify-center mb-6 bg-white/5 border border-white/10 rounded-2xl px-5 py-4">
             <span className="text-sm font-semibold text-zinc-300 w-full text-center sm:w-auto sm:text-left">Brand Kit</span>
@@ -563,6 +594,44 @@ export default function Create() {
                 <div className="w-full h-full rounded-lg" style={{ background: accentColor || "linear-gradient(135deg,#a855f7,#ec4899)" }} />
               </label>
               {accentColor && <button onClick={() => setAccentColor("")} className="text-xs text-zinc-500 hover:text-white transition">✕</button>}
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-zinc-500">Font</span>
+              {["font-sans", "font-serif", "font-mono"].map((font) => (
+                <button
+                  key={font}
+                  onClick={() => setCardFont(font)}
+                  className={`text-xs px-3 py-1 rounded-full border transition ${cardFont === font ? "bg-white/20 border-white/40 text-white" : "border-white/10 text-zinc-400 hover:border-white/30"}`}
+                >
+                  {font.replace("font-", "")}
+                </button>
+              ))}
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-zinc-500">Logo</span>
+              {logoUrl ? (
+                <>
+                  <img src={logoUrl} alt="logo" className="w-8 h-8 rounded object-contain bg-white/10" />
+                  <button onClick={() => setLogoUrl(null)} className="text-xs text-zinc-500 hover:text-white transition">✕</button>
+                </>
+              ) : (
+                <label className="cursor-pointer text-xs text-zinc-400 hover:text-white transition border border-white/10 rounded-lg px-2 py-1">
+                  Upload
+                  <input
+                    type="file"
+                    accept="image/png,image/svg+xml,image/jpeg,image/webp"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+                      const reader = new FileReader();
+                      reader.onload = () => setLogoUrl(reader.result as string);
+                      reader.readAsDataURL(file);
+                      e.target.value = "";
+                    }}
+                  />
+                </label>
+              )}
             </div>
             {session?.user?.email && (
               <button onClick={saveBrandKit} className="text-xs px-3 py-1.5 rounded-lg bg-purple-600 hover:bg-purple-500 text-white transition font-medium">
@@ -639,13 +708,18 @@ export default function Create() {
                       </div>
                     )}
                     <span className={`text-xs ${t.isLight ? "text-black/40" : "text-white/40"}`}>{userName}</span>
-                    {isPro ? (
-                      <span className={`ml-auto text-[10px] font-medium tracking-widest uppercase ${t.isLight ? "text-black/20" : "text-white/20"}`}>CarouselAI</span>
-                    ) : (
-                      <span className={`ml-auto text-[10px] font-bold tracking-wide uppercase px-2 py-1 rounded-full border ${t.isLight ? "bg-black/5 text-black/60 border-black/10" : "bg-white/10 text-white/70 border-white/20"}`}>
-                        Made with CarouselAI
-                      </span>
-                    )}
+                    <div className="ml-auto flex items-center gap-2">
+                      {logoUrl && (
+                        <img src={logoUrl} alt="logo" className="h-5 w-auto max-w-[60px] object-contain opacity-80" />
+                      )}
+                      {isPro ? (
+                        !logoUrl && <span className={`text-[10px] font-medium tracking-widest uppercase ${t.isLight ? "text-black/20" : "text-white/20"}`}>CarouselAI</span>
+                      ) : (
+                        <span className={`text-[10px] font-bold tracking-wide uppercase px-2 py-1 rounded-full border ${t.isLight ? "bg-black/5 text-black/60 border-black/10" : "bg-white/10 text-white/70 border-white/20"}`}>
+                          Made with CarouselAI.tech
+                        </span>
+                      )}
+                    </div>
                   </div>
 
                   <button

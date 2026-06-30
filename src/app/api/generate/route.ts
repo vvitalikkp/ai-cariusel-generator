@@ -40,6 +40,30 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "pro_required" })
     }
 
+    if (mode === "linkedin_post") {
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [
+          {
+            role: "user",
+            content: `Write a LinkedIn post (150-220 words) to accompany a carousel about: ${idea}.
+
+Requirements:
+- First line: a bold hook that stops the scroll (no question as opener, make a strong statement or counterintuitive claim)
+- Body: 3-5 short punchy paragraphs, each 1-2 sentences. Concrete and specific — no filler phrases like "game-changer", "unlock your potential", "in today's world"
+- End with a direct CTA: ask a specific question to drive comments OR give one concrete next step
+- Add 3-5 relevant hashtags on the last line
+- Use line breaks generously for readability
+- No emojis unless they genuinely add meaning (max 2)
+
+Return only the post text, no extra explanation.`,
+          }
+        ]
+      })
+      const post = response.choices[0].message.content?.trim() || ""
+      return NextResponse.json({ post })
+    }
+
     const lastUpdate = row?.updated_at ? new Date(row.updated_at) : null
     const now = new Date()
     const sameMonth = !!lastUpdate &&
