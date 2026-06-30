@@ -101,6 +101,10 @@ export default function Create() {
         const data = await res.json();
         if (data.brandColor) setBrandColor(data.brandColor);
         if (data.accentColor) setAccentColor(data.accentColor);
+        if (data.logoUrl) setLogoUrl(data.logoUrl);
+        if (data.fontFamily) setCardFont(data.fontFamily);
+        if (data.userName) setUserName(data.userName);
+        if (data.userAvatar) setUserAvatar(data.userAvatar);
       } catch (e) {
         console.error(e);
       }
@@ -115,11 +119,19 @@ export default function Create() {
       await fetch("/api/brand-kit", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: session.user.email, brandColor, accentColor }),
+        body: JSON.stringify({
+          email: session.user.email,
+          brandColor,
+          accentColor,
+          logoUrl: logoUrl ?? null,
+          fontFamily: cardFont,
+          userName,
+          userAvatar: userAvatar ?? null,
+        }),
       });
-      localStorage.setItem("carouselai_font", cardFont);
-      if (logoUrl) localStorage.setItem("carouselai_logo", logoUrl);
-      else localStorage.removeItem("carouselai_logo");
+      // Удаляем старые localStorage ключи если они были
+      localStorage.removeItem("carouselai_font");
+      localStorage.removeItem("carouselai_logo");
       setBrandSaved(true);
       setTimeout(() => setBrandSaved(false), 2000);
     } catch (e) {
