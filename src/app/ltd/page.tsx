@@ -6,7 +6,6 @@ import { useSearchParams } from "next/navigation";
 import { useSession, signIn } from "next-auth/react";
 
 const TOTAL_SPOTS = 500;
-const SPOTS_TAKEN = 47; // update manually as sales come in
 
 const FEATURES = [
   "Unlimited carousel generations — no monthly cap",
@@ -48,10 +47,19 @@ export default function LtdPage() {
   const { data: session } = useSession();
   const searchParams = useSearchParams();
   const [loading, setLoading] = useState(false);
-  const spotsLeft = TOTAL_SPOTS - SPOTS_TAKEN;
+  const [soldCount, setSoldCount] = useState(0);
+  const spotsLeft = TOTAL_SPOTS - soldCount;
+  const soldOut = spotsLeft <= 0;
 
   const success = searchParams.get("success") === "true";
   const canceled = searchParams.get("canceled") === "true";
+
+  useEffect(() => {
+    fetch("/api/ltd-count")
+      .then((r) => r.json())
+      .then((d) => setSoldCount(d.sold ?? 0))
+      .catch(() => {});
+  }, []);
 
   async function handleBuy() {
     if (!session?.user?.email) {
@@ -124,14 +132,14 @@ export default function LtdPage() {
 
           <button
             onClick={handleBuy}
-            disabled={loading}
-            className="w-full bg-fuchsia-600 hover:bg-fuchsia-500 disabled:opacity-60 text-white font-bold py-4 rounded-xl text-lg transition"
+            disabled={loading || soldOut}
+            className="w-full bg-fuchsia-600 hover:bg-fuchsia-500 disabled:opacity-60 disabled:cursor-not-allowed text-white font-bold py-4 rounded-xl text-lg transition"
           >
-            {loading ? "Redirecting..." : "Get Lifetime Access →"}
+            {soldOut ? "Sold Out" : loading ? "Redirecting..." : "Get Lifetime Access →"}
           </button>
 
           <p className="text-zinc-500 text-xs mt-3">
-            14-day money-back guarantee · Secure checkout via Stripe
+            {soldOut ? "All 500 lifetime licenses have been claimed." : "14-day money-back guarantee · Secure checkout via Stripe"}
           </p>
         </div>
 
@@ -139,12 +147,15 @@ export default function LtdPage() {
         <div className="flex items-center justify-center gap-3 text-sm">
           <div className="flex-1 max-w-[200px] bg-zinc-800 rounded-full h-2">
             <div
-              className="bg-fuchsia-500 h-2 rounded-full"
-              style={{ width: `${(SPOTS_TAKEN / TOTAL_SPOTS) * 100}%` }}
+              className="bg-fuchsia-500 h-2 rounded-full transition-all duration-700"
+              style={{ width: `${Math.min((soldCount / TOTAL_SPOTS) * 100, 100)}%` }}
             />
           </div>
           <span className="text-zinc-400">
-            <span className="text-white font-bold">{spotsLeft}</span> of {TOTAL_SPOTS} spots remaining
+            {soldOut
+              ? <span className="text-red-400 font-bold">Sold out</span>
+              : <><span className="text-white font-bold">{spotsLeft}</span> of {TOTAL_SPOTS} spots remaining</>
+            }
           </span>
         </div>
       </section>
@@ -198,17 +209,27 @@ export default function LtdPage() {
 
       {/* Bottom CTA */}
       <section className="max-w-2xl mx-auto px-4 sm:px-8 py-12 text-center">
-        <h2 className="text-3xl font-black mb-4">Stop paying monthly. Own it.</h2>
+        <h2 className="text-3xl font-black mb-4">
+          {soldOut ? "All licenses claimed." : "Stop paying monthly. Own it."}
+        </h2>
         <p className="text-zinc-400 mb-8">
-          {spotsLeft} spots left at $59. After that, Pro is $24/month.
+          {soldOut
+            ? "The lifetime deal is no longer available. Pro is $24/month."
+            : `${spotsLeft} spots left at $59. After that, Pro is $24/month.`}
         </p>
-        <button
-          onClick={handleBuy}
-          disabled={loading}
-          className="bg-fuchsia-600 hover:bg-fuchsia-500 disabled:opacity-60 text-white font-bold px-10 py-4 rounded-xl text-lg transition"
-        >
-          {loading ? "Redirecting..." : "Get Lifetime Access — $59"}
-        </button>
+        {soldOut ? (
+          <a href="/#pricing" className="bg-purple-600 hover:bg-purple-500 text-white font-bold px-10 py-4 rounded-xl text-lg transition inline-block">
+            See Pro subscription →
+          </a>
+        ) : (
+          <button
+            onClick={handleBuy}
+            disabled={loading}
+            className="bg-fuchsia-600 hover:bg-fuchsia-500 disabled:opacity-60 text-white font-bold px-10 py-4 rounded-xl text-lg transition"
+          >
+            {loading ? "Redirecting..." : "Get Lifetime Access — $59"}
+          </button>
+        )}
         <p className="text-zinc-600 text-xs mt-4">14-day refund guarantee · Stripe checkout</p>
       </section>
 
