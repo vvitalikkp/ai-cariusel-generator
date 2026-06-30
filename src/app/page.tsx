@@ -64,6 +64,9 @@ export default function Home() {
         <div className="flex items-center gap-2 sm:gap-6 text-sm text-zinc-400 min-w-0">
           <a href="#how-it-works" className="hidden md:inline hover:text-white transition whitespace-nowrap">Features</a>
           <a href="#pricing" className="hidden md:inline hover:text-white transition whitespace-nowrap">Pricing</a>
+          <Link href="/ltd" className="hidden md:inline-flex items-center gap-1 text-fuchsia-400 hover:text-fuchsia-300 transition whitespace-nowrap font-semibold">
+            Lifetime Deal
+          </Link>
           {isPro && <span className="hidden sm:inline px-3 py-1 rounded-full bg-fuchsia-500/20 border border-fuchsia-500/40 text-fuchsia-300 text-xs font-bold whitespace-nowrap">PRO</span>}
           <SignInButton />
           <Link href="/create" className="bg-purple-600 hover:bg-purple-500 text-white px-3 sm:px-5 py-2 rounded-lg text-sm font-bold transition whitespace-nowrap">
@@ -245,6 +248,21 @@ export default function Home() {
           </div>
         </div>
         <p className="text-center text-zinc-600 text-sm mt-10">🔒 Secure payment via Stripe · Cancel anytime</p>
+
+        {/* LTD upsell */}
+        <div className="max-w-3xl mx-auto mt-8">
+          <Link href="/ltd" className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-fuchsia-950/40 border border-fuchsia-500/30 rounded-2xl px-6 py-5 hover:border-fuchsia-500/60 transition group">
+            <div>
+              <p className="font-bold text-white group-hover:text-fuchsia-300 transition">
+                Prefer to pay once? <span className="text-fuchsia-400">Lifetime Deal available →</span>
+              </p>
+              <p className="text-zinc-500 text-sm mt-0.5">$59 one-time · all Pro features forever · limited to 500 licenses</p>
+            </div>
+            <span className="shrink-0 bg-fuchsia-600 text-white text-sm font-bold px-5 py-2 rounded-xl whitespace-nowrap">
+              See deal
+            </span>
+          </Link>
+        </div>
       </section>
 
       <footer className="relative z-10 max-w-7xl mx-auto px-6 py-10 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-zinc-500">
