@@ -34,6 +34,9 @@ export default function Create() {
   const [cardFont, setCardFont] = useState("font-sans");
   const [userName, setUserName] = useState("CarouselAI");
   const [userAvatar, setUserAvatar] = useState<string | null>(null);
+  const [brandColor, setBrandColor] = useState("");
+  const [accentColor, setAccentColor] = useState("");
+  const [brandSaved, setBrandSaved] = useState(false);
   const [showPaywall, setShowPaywall] = useState(false);
   const [isPro, setIsPro] = useState(false);
   const [showIdeaBank, setShowIdeaBank] = useState(false);
@@ -84,8 +87,35 @@ export default function Create() {
         console.error(e);
       }
     }
+    async function loadBrandKit() {
+      if (!session?.user?.email) return;
+      try {
+        const res = await fetch(`/api/brand-kit?email=${encodeURIComponent(session.user.email)}`);
+        const data = await res.json();
+        if (data.brandColor) setBrandColor(data.brandColor);
+        if (data.accentColor) setAccentColor(data.accentColor);
+      } catch (e) {
+        console.error(e);
+      }
+    }
     checkPro();
+    loadBrandKit();
   }, [session]);
+
+  async function saveBrandKit() {
+    if (!session?.user?.email) return;
+    try {
+      await fetch("/api/brand-kit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: session.user.email, brandColor, accentColor }),
+      });
+      setBrandSaved(true);
+      setTimeout(() => setBrandSaved(false), 2000);
+    } catch (e) {
+      console.error(e);
+    }
+  }
 
   async function importFromUrl() {
     if (!importUrl.trim()) return;
@@ -500,7 +530,7 @@ export default function Create() {
               </button>
             ))}
           </div>
-          <div className="flex flex-wrap gap-4 justify-center mb-6">
+          <div className="flex flex-wrap gap-4 justify-center mb-4">
             <div className="flex items-center gap-2">
               <span className="text-sm text-zinc-400">Font:</span>
               {["font-sans", "font-serif", "font-mono"].map((font) => (
@@ -513,7 +543,36 @@ export default function Create() {
                 </button>
               ))}
             </div>
-            <div className="flex items-center gap-3 mt-2">
+          </div>
+
+          {/* Brand Kit */}
+          <div className="flex flex-wrap items-center gap-4 justify-center mb-6 bg-white/5 border border-white/10 rounded-2xl px-5 py-4">
+            <span className="text-sm font-semibold text-zinc-300 w-full text-center sm:w-auto sm:text-left">Brand Kit</span>
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-zinc-500">Card</span>
+              <label className="relative w-8 h-8 rounded-lg overflow-hidden cursor-pointer border-2 border-white/20 hover:border-white/60 transition">
+                <input type="color" value={brandColor || "#000000"} onChange={(e) => setBrandColor(e.target.value)} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
+                <div className="w-full h-full rounded-lg" style={{ background: brandColor || "linear-gradient(135deg,#7c3aed,#db2777)" }} />
+              </label>
+              {brandColor && <button onClick={() => setBrandColor("")} className="text-xs text-zinc-500 hover:text-white transition">✕</button>}
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-zinc-500">Accent</span>
+              <label className="relative w-8 h-8 rounded-lg overflow-hidden cursor-pointer border-2 border-white/20 hover:border-white/60 transition">
+                <input type="color" value={accentColor || "#a855f7"} onChange={(e) => setAccentColor(e.target.value)} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
+                <div className="w-full h-full rounded-lg" style={{ background: accentColor || "linear-gradient(135deg,#a855f7,#ec4899)" }} />
+              </label>
+              {accentColor && <button onClick={() => setAccentColor("")} className="text-xs text-zinc-500 hover:text-white transition">✕</button>}
+            </div>
+            {session?.user?.email && (
+              <button onClick={saveBrandKit} className="text-xs px-3 py-1.5 rounded-lg bg-purple-600 hover:bg-purple-500 text-white transition font-medium">
+                {brandSaved ? "Saved ✓" : "Save"}
+              </button>
+            )}
+          </div>
+
+          <div className="flex flex-wrap gap-4 justify-center mb-6">
+            <div className="flex items-center gap-3">
               <span className="text-sm text-zinc-400">Name:</span>
               <input
                 type="text"
@@ -546,14 +605,14 @@ export default function Create() {
                 key={i}
                 id={`slide-${i}`}
                 className={`relative rounded-[28px] overflow-hidden ${t.card}`}
-                style={{ width: "100%", aspectRatio: "4/5" }}
+                style={{ width: "100%", aspectRatio: "4/5", ...(brandColor ? { background: brandColor } : {}) }}
               >
                 <div className={`relative z-10 flex flex-col h-full p-8 ${cardFont}`}>
                   <div className="flex items-center justify-between">
                     <span className={`text-xs font-bold tracking-[0.3em] uppercase ${t.num}`}>
                       {String(i + 1).padStart(2, "0")} / {slides.length.toString().padStart(2, "0")}
                     </span>
-                    <div className={`w-2.5 h-2.5 rounded-full ${t.dot}`} />
+                    <div className={`w-2.5 h-2.5 rounded-full ${t.dot}`} style={accentColor ? { backgroundColor: accentColor } : {}} />
                   </div>
 
                   <div className="flex-1 flex flex-col justify-center gap-5 py-8">
