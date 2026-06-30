@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useSession, signIn } from "next-auth/react";
@@ -44,6 +44,14 @@ const FAQ = [
 ];
 
 export default function LtdPage() {
+  return (
+    <Suspense fallback={null}>
+      <LtdPageInner />
+    </Suspense>
+  );
+}
+
+function LtdPageInner() {
   const { data: session } = useSession();
   const searchParams = useSearchParams();
   const [loading, setLoading] = useState(false);
