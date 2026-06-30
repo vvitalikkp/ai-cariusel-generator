@@ -9,7 +9,15 @@ import { TEMPLATES, SHOWCASE_EXAMPLES } from "@/lib/templates";
 export default function Home() {
   const [isPro, setIsPro] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [totalCarousels, setTotalCarousels] = useState<number | null>(null);
   const { data: session } = useSession();
+
+  useEffect(() => {
+    fetch("/api/stats")
+      .then((r) => r.json())
+      .then((d) => setTotalCarousels(d.total ?? null))
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -102,6 +110,11 @@ export default function Home() {
               </Link>
               <a href="#showcase" className="text-zinc-400 hover:text-white text-sm transition">See examples ↓</a>
             </div>
+            {totalCarousels !== null && totalCarousels > 0 && (
+              <p className="text-sm text-zinc-500 mt-2">
+                <span className="text-white font-bold">{totalCarousels.toLocaleString()}</span> carousels created by creators worldwide
+              </p>
+            )}
           </div>
 
           <div className="relative h-[480px] hidden lg:block">
