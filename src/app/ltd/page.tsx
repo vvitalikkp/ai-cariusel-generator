@@ -11,13 +11,13 @@ const FEATURES = [
   "Unlimited carousel generations — no monthly cap",
   "25 premium templates (more added regularly)",
   "4 AI tone presets: Storytelling, Authority, Contrarian, Data-Driven",
+  "Brand Kit — upload your logo, set colors & font",
   "Export as PNG (ZIP) — post-ready, high resolution",
   "Export as PDF — LinkedIn document carousel format",
   "LinkedIn Post generator — AI writes the caption too",
+  "Import from URL, PDF, or YouTube video",
   "Idea Bank — 15 curated prompts across 5 categories",
-  "Import from URL — paste any article or blog post",
-  "All future features included",
-  "No subscription. No renewal. Ever.",
+  "All future features included. No subscription. Ever.",
 ];
 
 const FAQ = [
@@ -56,6 +56,7 @@ function LtdPageInner() {
   const searchParams = useSearchParams();
   const [loading, setLoading] = useState(false);
   const [soldCount, setSoldCount] = useState(0);
+  const [carouselCount, setCarouselCount] = useState(0);
   const spotsLeft = TOTAL_SPOTS - soldCount;
   const soldOut = spotsLeft <= 0;
 
@@ -66,6 +67,10 @@ function LtdPageInner() {
     fetch("/api/ltd-count")
       .then((r) => r.json())
       .then((d) => setSoldCount(d.sold ?? 0))
+      .catch(() => {});
+    fetch("/api/stats")
+      .then((r) => r.json())
+      .then((d) => setCarouselCount(d.total ?? 0))
       .catch(() => {});
   }, []);
 
@@ -166,6 +171,45 @@ function LtdPageInner() {
             }
           </span>
         </div>
+      </section>
+
+      {/* Stats bar */}
+      {carouselCount > 0 && (
+        <div className="flex justify-center mt-6">
+          <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-full px-5 py-2 text-sm text-zinc-400">
+            <span className="w-2 h-2 rounded-full bg-fuchsia-400 animate-pulse" />
+            <span><span className="text-white font-bold">{carouselCount.toLocaleString()}</span> carousels created by creators worldwide</span>
+          </div>
+        </div>
+      )}
+
+      {/* Example carousel slide */}
+      <section className="max-w-3xl mx-auto px-4 sm:px-8 pt-16 pb-4">
+        <p className="text-center text-xs uppercase tracking-widest text-zinc-500 mb-8">What you get</p>
+        <div className="grid sm:grid-cols-3 gap-4">
+          {[
+            { num: "01", title: "Most LinkedIn posts fail in the first line", desc: "They bury the hook. They open with context. They give the reader a reason to scroll past." },
+            { num: "02", title: "The scroll-stop formula nobody teaches", desc: "Start with a provocation, not an introduction. Your first line should feel incomplete — pull people into slide 2." },
+            { num: "03", title: "Start today: rewrite your last post's opening", desc: "Take your last carousel. Rewrite slide 1. Make it a bold claim or counterintuitive statement. Post it again." },
+          ].map(({ num, title, desc }) => (
+            <div key={num} className="bg-[#08090c] border border-white/[0.07] rounded-2xl p-6 flex flex-col gap-4 aspect-[4/5]">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold tracking-[0.3em] text-zinc-500">{num} / 03</span>
+                <div className="w-2 h-2 rounded-full bg-violet-500 shadow-[0_0_8px_rgba(139,92,246,0.5)]" />
+              </div>
+              <div className="flex-1 flex flex-col justify-center gap-3">
+                <p className="text-white font-semibold text-lg leading-tight">{title}</p>
+                <p className="text-zinc-400 text-sm leading-relaxed">{desc}</p>
+              </div>
+              <div className="flex items-center gap-2 pt-3 border-t border-white/[0.07]">
+                <div className="w-5 h-5 rounded-full bg-violet-500 flex items-center justify-center text-[10px] font-bold text-white">C</div>
+                <span className="text-xs text-white/30">CarouselAI</span>
+                <span className="ml-auto text-[9px] font-medium tracking-widest uppercase text-white/20">CarouselAI</span>
+              </div>
+            </div>
+          ))}
+        </div>
+        <p className="text-center text-xs text-zinc-600 mt-4">Generated in &lt;10 seconds with the Linear template</p>
       </section>
 
       {/* Vs subscription comparison */}
