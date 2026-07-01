@@ -278,6 +278,8 @@ export default function Home() {
         </div>
       </section>
 
+      <PhLaunchSection />
+
       <footer className="relative z-10 max-w-7xl mx-auto px-6 py-10 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-zinc-500">
         <span>© 2026 CarouselAI</span>
         <div className="flex items-center gap-6">
@@ -299,5 +301,68 @@ export default function Home() {
       )}
 
     </main>
+  );
+}
+
+function PhLaunchSection() {
+  const [email, setEmail] = useState("");
+  const [status, setStatus] = useState<"idle" | "loading" | "done" | "error">("idle");
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!email.includes("@")) return;
+    setStatus("loading");
+    try {
+      const res = await fetch("/api/ph-waitlist", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+      setStatus(res.ok ? "done" : "error");
+    } catch {
+      setStatus("error");
+    }
+  }
+
+  return (
+    <section id="ph-launch" className="relative z-10 max-w-2xl mx-auto px-6 py-20 text-center">
+      <div className="bg-white/[0.03] border border-white/10 rounded-[32px] p-10">
+        <div className="flex items-center justify-center gap-2 mb-6">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M10 0C4.48 0 0 4.48 0 10s4.48 10 10 10 10-4.48 10-10S15.52 0 10 0zm2.5 10H10v2.5L6.25 10 10 7.5V10h2.5V7.5L16.25 10 12.5 12.5V10z" fill="#DA552F"/>
+          </svg>
+          <span className="text-sm font-bold text-orange-400 uppercase tracking-widest">Product Hunt</span>
+        </div>
+        <h2 className="text-3xl font-black mb-3">We&apos;re launching soon</h2>
+        <p className="text-zinc-400 mb-8 max-w-md mx-auto">
+          Get notified when CarouselAI hits Product Hunt — and be first to upvote. Early supporters get a free month of Pro.
+        </p>
+        {status === "done" ? (
+          <div className="flex items-center justify-center gap-2 text-green-400 font-medium">
+            <span>✓</span> You&apos;re on the list — we&apos;ll ping you on launch day!
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="your@email.com"
+              required
+              className="flex-1 px-5 py-3 rounded-xl bg-white/5 border border-white/10 outline-none text-sm focus:border-orange-500/50 transition"
+            />
+            <button
+              type="submit"
+              disabled={status === "loading"}
+              className="px-6 py-3 rounded-xl bg-orange-500 hover:bg-orange-400 disabled:opacity-60 text-white font-bold text-sm transition whitespace-nowrap"
+            >
+              {status === "loading" ? "..." : "Notify me 🚀"}
+            </button>
+          </form>
+        )}
+        {status === "error" && <p className="text-red-400 text-xs mt-3">Something went wrong. Try again.</p>}
+        <p className="text-zinc-600 text-xs mt-4">No spam. One email on launch day.</p>
+      </div>
+    </section>
   );
 }

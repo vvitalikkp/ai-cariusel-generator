@@ -285,6 +285,16 @@ function LtdPageInner() {
         <p className="text-zinc-600 text-xs mt-4">14-day refund guarantee · Stripe checkout</p>
       </section>
 
+      {/* PH badge */}
+      <div className="flex justify-center pb-12">
+        <div className="flex items-center gap-2 border border-orange-500/30 bg-orange-500/5 rounded-full px-5 py-2 text-sm text-orange-400">
+          <svg width="16" height="16" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M10 0C4.48 0 0 4.48 0 10s4.48 10 10 10 10-4.48 10-10S15.52 0 10 0zm2.5 10H10v2.5L6.25 10 10 7.5V10h2.5V7.5L16.25 10 12.5 12.5V10z" fill="#DA552F"/>
+          </svg>
+          Coming soon to Product Hunt — <Link href="/#ph-launch" className="underline underline-offset-2 hover:text-orange-300 transition">get notified →</Link>
+        </div>
+      </div>
+
       {/* Footer */}
       <footer className="border-t border-zinc-900 py-8 text-center text-zinc-600 text-sm">
         <Link href="/" className="hover:text-white transition mr-4">Home</Link>
