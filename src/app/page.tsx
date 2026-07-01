@@ -88,18 +88,18 @@ export default function Home() {
         <div className="grid lg:grid-cols-2 gap-16 items-center">
           <div>
             <div className="mb-6 inline-block px-5 py-2 rounded-full border border-white/10 bg-white/5 backdrop-blur-xl text-sm">
-              AI-powered LinkedIn Growth
+              ⚡ From idea to carousel in 30 seconds
             </div>
             <h1 className="text-6xl font-black leading-tight mb-6 tracking-tight">
-              Create Viral<br />LinkedIn Carousels<br />with AI
+              Turn any idea into<br />a LinkedIn carousel<br />people actually share
             </h1>
             <p className="text-zinc-400 text-xl mb-6 max-w-xl">
-              Paste a tweet, an idea, or an article. Get a polished 6-slide carousel — hook, structure, and design handled by AI.
+              Paste a tweet, YouTube link, article, or idea. AI writes the hook, structures the slides, and designs the carousel — ready to post in seconds.
             </p>
             <div className="flex flex-col gap-2 mb-8 text-sm text-zinc-300">
-              <span className="flex items-center gap-2"><span className="text-green-400">✓</span> 25 premium templates, 4 AI tone presets</span>
-              <span className="flex items-center gap-2"><span className="text-green-400">✓</span> Export to PNG or PDF in one click</span>
-              <span className="flex items-center gap-2"><span className="text-green-400">✓</span> Free to try, no credit card required</span>
+              <span className="flex items-center gap-2"><span className="text-green-400">✓</span> 25 premium templates, Brand Kit, 4 AI tones</span>
+              <span className="flex items-center gap-2"><span className="text-green-400">✓</span> Import from YouTube, URL, PDF or plain text</span>
+              <span className="flex items-center gap-2"><span className="text-green-400">✓</span> Free to try — no credit card required</span>
             </div>
             <div className="flex items-center gap-4">
               <Link
@@ -222,45 +222,51 @@ export default function Home() {
         <div className="text-center mb-16">
           <p className="text-pink-400 uppercase tracking-[0.3em] text-sm mb-4">Pricing</p>
           <h2 className="text-5xl font-black mb-4">Simple pricing<br />for creators</h2>
-          <p className="text-zinc-400">Start free. Upgrade when you&apos;re ready to remove the watermark.</p>
+          <p className="text-zinc-400">Start free. Upgrade when you&apos;re ready to grow faster.</p>
         </div>
         <div className="grid md:grid-cols-2 gap-6 max-w-3xl mx-auto">
           <div className="bg-white/5 border border-white/10 rounded-[32px] p-8 backdrop-blur-xl flex flex-col">
             <h3 className="text-xl font-bold mb-2">Free</h3>
-            <p className="text-zinc-500 text-sm mb-6">Try it out every month</p>
+            <p className="text-zinc-500 text-sm mb-6">Perfect to try it out</p>
             <p className="text-5xl font-black mb-1">$0</p>
             <p className="text-zinc-600 text-sm mb-8">forever</p>
             <ul className="space-y-3 text-zinc-300 mb-8 flex-1">
               <li className="flex items-center gap-2"><span className="text-green-400">✓</span> 3 carousels / month</li>
               <li className="flex items-center gap-2"><span className="text-green-400">✓</span> PNG export</li>
-              <li className="flex items-center gap-2"><span className="text-green-400">✓</span> All templates &amp; tones</li>
+              <li className="flex items-center gap-2"><span className="text-green-400">✓</span> All 25 templates & tones</li>
+              <li className="flex items-center gap-2"><span className="text-green-400">✓</span> YouTube, URL, PDF import</li>
               <li className="flex items-center gap-2 text-zinc-600"><span>✗</span> PDF export</li>
-              <li className="flex items-center gap-2 text-zinc-600"><span>✗</span> Watermark removal</li>
+              <li className="flex items-center gap-2 text-zinc-600"><span>✗</span> Watermark on exports</li>
+              <li className="flex items-center gap-2 text-zinc-600"><span>✗</span> Brand Kit (logo, colors, font)</li>
+              <li className="flex items-center gap-2 text-zinc-600"><span>✗</span> LinkedIn Post generator</li>
             </ul>
             <Link href="/create" className="w-full py-4 rounded-2xl bg-white/10 hover:bg-white/20 transition font-bold text-center">Start Free</Link>
           </div>
 
           <div className="relative bg-gradient-to-br from-fuchsia-600/30 to-purple-600/20 border border-fuchsia-500/40 rounded-[32px] p-8 shadow-[0_0_60px_rgba(217,70,239,0.25)] flex flex-col">
-            <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-fuchsia-500 text-white text-xs font-black px-4 py-1.5 rounded-full uppercase tracking-widest whitespace-nowrap">BEST VALUE</div>
+            <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-fuchsia-500 text-white text-xs font-black px-4 py-1.5 rounded-full uppercase tracking-widest whitespace-nowrap">MOST POPULAR</div>
             <h3 className="text-xl font-bold mb-2">Pro</h3>
-            <p className="text-zinc-400 text-sm mb-6">For creators who post often</p>
+            <p className="text-zinc-400 text-sm mb-6">For creators who post consistently</p>
             <div className="flex items-end gap-1 mb-1">
               <p className="text-5xl font-black">$24</p>
               <p className="text-zinc-400 text-sm mb-2">/month</p>
             </div>
-            <p className="text-zinc-400 text-sm mb-8">or $19/mo billed annually</p>
+            <p className="text-zinc-400 text-sm mb-8">or $19/mo billed annually — save 21%</p>
             <ul className="space-y-3 text-zinc-200 mb-8 flex-1">
               <li className="flex items-center gap-2"><span className="text-green-400">✓</span> Unlimited carousels</li>
               <li className="flex items-center gap-2"><span className="text-green-400">✓</span> PNG + PDF export</li>
-              <li className="flex items-center gap-2"><span className="text-green-400">✓</span> All templates &amp; tones</li>
-              <li className="flex items-center gap-2"><span className="text-green-400">✓</span> LinkedIn Post generator</li>
-              <li className="flex items-center gap-2"><span className="text-green-400">✓</span> No watermark</li>
+              <li className="flex items-center gap-2"><span className="text-green-400">✓</span> All 25 templates & tones</li>
+              <li className="flex items-center gap-2"><span className="text-green-400">✓</span> YouTube, URL, PDF import</li>
+              <li className="flex items-center gap-2"><span className="text-fuchsia-400">✓</span> <strong>No watermark</strong></li>
+              <li className="flex items-center gap-2"><span className="text-fuchsia-400">✓</span> <strong>Brand Kit — logo, colors, font</strong></li>
+              <li className="flex items-center gap-2"><span className="text-fuchsia-400">✓</span> <strong>LinkedIn Post generator</strong></li>
+              <li className="flex items-center gap-2"><span className="text-fuchsia-400">✓</span> <strong>Priority support</strong></li>
             </ul>
             <button onClick={() => handleUpgrade("pro_monthly")} className="w-full py-4 rounded-2xl bg-fuchsia-500 hover:bg-fuchsia-400 transition font-bold shadow-[0_0_30px_rgba(217,70,239,0.4)] mb-2">Get Pro — $24/mo</button>
-            <button onClick={() => handleUpgrade("pro_annual")} className="w-full py-2 text-sm text-fuchsia-300 hover:text-fuchsia-200 transition">Get annual — $19/mo billed yearly</button>
+            <button onClick={() => handleUpgrade("pro_annual")} className="w-full py-2 text-sm text-fuchsia-300 hover:text-fuchsia-200 transition">Save 21% — $19/mo billed yearly</button>
           </div>
         </div>
-        <p className="text-center text-zinc-600 text-sm mt-10">🔒 Secure payment via Stripe · Cancel anytime</p>
+        <p className="text-center text-zinc-600 text-sm mt-10">🔒 Secure payment via Stripe · Cancel anytime · Access continues until end of billing period</p>
 
         {/* LTD upsell */}
         <div className="max-w-3xl mx-auto mt-8">
