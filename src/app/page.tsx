@@ -193,6 +193,50 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Testimonials */}
+      <section className="relative z-10 max-w-5xl mx-auto py-20 px-6">
+        <div className="text-center mb-12">
+          <p className="text-purple-400 text-sm uppercase tracking-[0.3em] mb-4">What creators say</p>
+          <h2 className="text-4xl font-black mb-4">Loved by LinkedIn creators</h2>
+        </div>
+        <div className="grid md:grid-cols-3 gap-5">
+          <div className="bg-white/5 border border-white/10 rounded-[24px] p-6 flex flex-col gap-4">
+            <div className="flex gap-1 text-yellow-400 text-sm">★★★★★</div>
+            <p className="text-zinc-300 text-sm leading-relaxed">&ldquo;I went from spending 2 hours on a carousel to 2 minutes. The Brand Kit saves my colors and font automatically — every post looks on-brand without any effort.&rdquo;</p>
+            <div className="flex items-center gap-3 mt-auto pt-4 border-t border-white/10">
+              <div className="w-9 h-9 rounded-full bg-purple-600 flex items-center justify-center text-sm font-bold">S</div>
+              <div>
+                <p className="text-sm font-bold text-white">Sarah K.</p>
+                <p className="text-xs text-zinc-500">LinkedIn Creator · 12K followers</p>
+              </div>
+            </div>
+          </div>
+          <div className="bg-white/5 border border-white/10 rounded-[24px] p-6 flex flex-col gap-4">
+            <div className="flex gap-1 text-yellow-400 text-sm">★★★★★</div>
+            <p className="text-zinc-300 text-sm leading-relaxed">&ldquo;Pasted a YouTube link and got a full carousel in 30 seconds. The AI nailed the hook and structure. This is the only carousel tool that actually understands LinkedIn format.&rdquo;</p>
+            <div className="flex items-center gap-3 mt-auto pt-4 border-t border-white/10">
+              <div className="w-9 h-9 rounded-full bg-fuchsia-600 flex items-center justify-center text-sm font-bold">M</div>
+              <div>
+                <p className="text-sm font-bold text-white">Marcus T.</p>
+                <p className="text-xs text-zinc-500">B2B Founder · SaaS Growth</p>
+              </div>
+            </div>
+          </div>
+          <div className="bg-white/5 border border-white/10 rounded-[24px] p-6 flex flex-col gap-4">
+            <div className="flex gap-1 text-yellow-400 text-sm">★★★★★</div>
+            <p className="text-zinc-300 text-sm leading-relaxed">&ldquo;I tried ContentDrips and PostNitro — both overloaded with options. CarouselAI is the only one that gets out of my way and just works. Dark theme is 🔥 too.&rdquo;</p>
+            <div className="flex items-center gap-3 mt-auto pt-4 border-t border-white/10">
+              <div className="w-9 h-9 rounded-full bg-blue-600 flex items-center justify-center text-sm font-bold">A</div>
+              <div>
+                <p className="text-sm font-bold text-white">Alex R.</p>
+                <p className="text-xs text-zinc-500">Marketing Consultant</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p className="text-center text-zinc-600 text-xs mt-8">Replace these with your real reviews — <a href="mailto:hello@aicarousel.tech" className="text-purple-400 hover:text-purple-300 transition">share your story</a></p>
+      </section>
+
       <section id="how-it-works" className="relative z-10 max-w-4xl mx-auto py-20 px-6">
         <div className="text-center mb-16">
           <p className="text-purple-400 uppercase tracking-[0.3em] text-sm mb-4">How it works</p>
