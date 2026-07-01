@@ -10,6 +10,46 @@ function isPrivateHost(hostname: string): boolean {
   return false
 }
 
+function extractYouTubeId(url: string): string | null {
+  try {
+    const u = new URL(url)
+    if (u.hostname.includes("youtu.be")) return u.pathname.slice(1).split("?")[0]
+    if (u.hostname.includes("youtube.com")) {
+      const v = u.searchParams.get("v")
+      if (v) return v
+      const match = u.pathname.match(/\/(?:embed|shorts|v)\/([^/?]+)/)
+      if (match) return match[1]
+    }
+  } catch {}
+  return null
+}
+
+async function fetchYouTubeData(videoId: string): Promise<string | null> {
+  const apiKey = process.env.YOUTUBE_API_KEY
+  if (!apiKey) return null
+
+  const metaRes = await fetch(
+    `https://www.googleapis.com/youtube/v3/videos?part=snippet&id=${videoId}&key=${apiKey}`,
+    { signal: AbortSignal.timeout(8000) }
+  )
+  if (!metaRes.ok) return null
+  const meta = await metaRes.json()
+  const item = meta.items?.[0]
+  if (!item) return null
+
+  const title = item.snippet?.title ?? ""
+  const description = (item.snippet?.description ?? "").slice(0, 2000)
+  const tags = (item.snippet?.tags ?? []).slice(0, 10).join(", ")
+
+  const result = [
+    `Video Title: ${title}`,
+    tags ? `Tags: ${tags}` : "",
+    `Description: ${description}`,
+  ].filter(Boolean).join("\n\n")
+
+  return result || null
+}
+
 export async function POST(req: Request) {
   try {
     const { url } = await req.json()
@@ -25,6 +65,17 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "invalid_url" })
     }
 
+    // YouTube — используем Data API
+    const youtubeId = extractYouTubeId(url)
+    if (youtubeId) {
+      const youtubeText = await fetchYouTubeData(youtubeId)
+      if (youtubeText) {
+        return NextResponse.json({ text: youtubeText, source: "youtube" })
+      }
+      return NextResponse.json({ error: "youtube_failed" })
+    }
+
+    // Обычные сайты — скрейпинг
     const res = await fetch(parsed.toString(), {
       headers: { "User-Agent": "Mozilla/5.0 (compatible; CarouselAI/1.0)" },
       signal: AbortSignal.timeout(10000),
