@@ -117,37 +117,54 @@ export default function Home() {
             )}
           </div>
 
-          <div className="relative h-[480px] hidden lg:block">
-            {[SHOWCASE_EXAMPLES[2], SHOWCASE_EXAMPLES[0]].map((ex, i) => {
-              const et = TEMPLATES[ex.style];
-              return (
-                <div
-                  key={i}
-                  className={`absolute rounded-[28px] overflow-hidden shadow-2xl ${et.card}`}
-                  style={{
-                    width: 280,
-                    aspectRatio: "4/5",
-                    top: i === 0 ? 0 : 70,
-                    left: i === 0 ? 40 : 200,
-                    transform: i === 0 ? "rotate(-4deg)" : "rotate(3deg)",
-                    zIndex: i,
-                  }}
-                >
-                  <div className="relative z-10 flex flex-col h-full p-7">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className={`text-[10px] font-bold uppercase tracking-widest ${et.isLight ? "text-black/30" : "text-white/30"}`}>
-                        {ex.style}
-                      </span>
-                      <div className={`w-2 h-2 rounded-full ${et.dot}`} />
-                    </div>
-                    <div className="flex-1 flex flex-col justify-center gap-3">
-                      <p className={`leading-tight ${et.title}`}>{ex.title}</p>
-                      <p className={`leading-relaxed text-xs ${et.desc}`}>{ex.desc}</p>
-                    </div>
+          <div className="relative hidden lg:block">
+            {/* Browser frame */}
+            <div className="rounded-2xl overflow-hidden border border-white/10 shadow-[0_0_80px_rgba(168,85,247,0.15)] bg-[#0d0d0d]">
+              {/* Browser chrome */}
+              <div className="flex items-center gap-2 px-4 py-3 border-b border-white/5 bg-white/3">
+                <div className="w-3 h-3 rounded-full bg-white/10" />
+                <div className="w-3 h-3 rounded-full bg-white/10" />
+                <div className="w-3 h-3 rounded-full bg-white/10" />
+                <div className="flex-1 mx-4 bg-white/5 rounded-md px-3 py-1 text-[11px] text-zinc-500">aicarousel.tech/create</div>
+              </div>
+              {/* App UI */}
+              <div className="flex h-[400px]">
+                {/* Left panel - input */}
+                <div className="w-[45%] border-r border-white/5 p-4 flex flex-col gap-3">
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">Your content</p>
+                  <div className="bg-white/5 rounded-xl p-3 border border-white/10 flex-1 text-[11px] text-zinc-400 leading-relaxed">
+                    5 reasons why most LinkedIn posts fail to get engagement — and what top creators do differently to consistently go viral...
+                  </div>
+                  <div className="flex gap-2">
+                    <div className="flex-1 bg-white/5 rounded-lg px-3 py-2 text-[10px] text-zinc-500 border border-white/5">Viral tone</div>
+                    <div className="flex-1 bg-white/5 rounded-lg px-3 py-2 text-[10px] text-zinc-500 border border-white/5">6 slides</div>
+                  </div>
+                  <div className="bg-purple-600 rounded-xl py-2.5 text-center text-[11px] font-bold text-white">
+                    Generate ✦
                   </div>
                 </div>
-              );
-            })}
+                {/* Right panel - carousel preview */}
+                <div className="flex-1 p-4 flex flex-col gap-2">
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">Preview — Slide 1 of 6</p>
+                  <div className="flex-1 rounded-xl bg-gradient-to-br from-purple-600 to-fuchsia-700 p-4 flex flex-col justify-between">
+                    <div className="text-[9px] font-bold uppercase tracking-widest text-white/40">VIRAL</div>
+                    <div>
+                      <p className="text-white font-black text-sm leading-tight mb-2">5 reasons your LinkedIn posts get zero engagement</p>
+                      <p className="text-white/60 text-[10px] leading-relaxed">Most creators make the same mistake on slide 1. Here&apos;s what actually works...</p>
+                    </div>
+                    <div className="text-[8px] text-white/30 font-bold uppercase tracking-wide self-end">Made with CarouselAI</div>
+                  </div>
+                  {/* Slide dots */}
+                  <div className="flex justify-center gap-1.5 mt-1">
+                    {[0,1,2,3,4,5].map(i => (
+                      <div key={i} className={`rounded-full ${i === 0 ? "w-4 h-1.5 bg-purple-400" : "w-1.5 h-1.5 bg-white/20"}`} />
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+            {/* Glow */}
+            <div className="absolute -inset-4 bg-purple-600/10 rounded-3xl blur-2xl -z-10" />
           </div>
         </div>
       </section>
