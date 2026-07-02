@@ -334,6 +334,13 @@ export default function Create() {
     for (let i = 0; i < slides.length; i++) {
       const el = document.getElementById(`slide-${i}`);
       if (!el) continue;
+
+      // Для Free юзеров — показываем водяной знак явно перед экспортом
+      if (!isPro) {
+        const wmEl = el.querySelector("[data-watermark]") as HTMLElement;
+        if (wmEl) wmEl.style.opacity = "1";
+      }
+
       const dataUrl = await toPng(el, { pixelRatio: 2, backgroundColor: "#000" });
       const blob = await (await fetch(dataUrl)).blob();
       zip.file(`slide-${i + 1}.png`, blob);
@@ -727,7 +734,7 @@ export default function Create() {
                       {isPro ? (
                         !logoUrl && <span className={`text-[10px] font-medium tracking-widest uppercase ${t.isLight ? "text-black/20" : "text-white/20"}`}>CarouselAI</span>
                       ) : (
-                        <span className={`text-[10px] font-bold tracking-wide uppercase px-2 py-1 rounded-full border ${t.isLight ? "bg-black/5 text-black/60 border-black/10" : "bg-white/10 text-white/70 border-white/20"}`}>
+                        <span data-watermark className={`text-[10px] font-bold tracking-wide uppercase px-2 py-1 rounded-full border ${t.isLight ? "bg-black/5 text-black/60 border-black/10" : "bg-white/10 text-white/70 border-white/20"}`}>
                           Made with CarouselAI.tech
                         </span>
                       )}

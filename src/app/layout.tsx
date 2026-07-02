@@ -16,19 +16,19 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.aicarousel.tech"),
-  title: "CarouselAI — Create Viral LinkedIn Carousels with AI",
-  description: "Paste a tweet, an idea, or an article. Get a polished 6-slide LinkedIn carousel in seconds — hooks, structure, and design handled by AI.",
+  title: "CarouselAI — Turn any idea into a LinkedIn carousel in 30 seconds",
+  description: "AI-powered LinkedIn carousel generator. Paste a topic, YouTube link, article, or PDF — get a polished 6-slide carousel with Brand Kit, 25 templates, PNG & PDF export. Free to try.",
   openGraph: {
-    title: "CarouselAI — Create Viral LinkedIn Carousels with AI",
-    description: "Paste a tweet, an idea, or an article. Get a polished 6-slide LinkedIn carousel in seconds.",
+    title: "CarouselAI — Turn any idea into a LinkedIn carousel in 30 seconds",
+    description: "AI carousel generator. 25 templates, Brand Kit, YouTube/PDF import. Free to try.",
     url: "https://www.aicarousel.tech",
     siteName: "CarouselAI",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "CarouselAI — Create Viral LinkedIn Carousels with AI",
-    description: "Paste a tweet, an idea, or an article. Get a polished 6-slide LinkedIn carousel in seconds.",
+    title: "CarouselAI — Turn any idea into a LinkedIn carousel in 30 seconds",
+    description: "AI carousel generator. 25 templates, Brand Kit, YouTube/PDF import. Free to try.",
   },
 };
 
