@@ -6,6 +6,111 @@ import { useSession } from "next-auth/react";
 import { SignInButton } from "./components/SignInButton";
 import { TEMPLATES, SHOWCASE_EXAMPLES } from "@/lib/templates";
 
+const DEMO_TOPICS = [
+  "5 habits of highly productive people",
+  "Why most startups fail in year one",
+  "How to grow on LinkedIn in 2026",
+  "The secret to writing viral hooks",
+];
+
+function DemoWidget() {
+  const [topic, setTopic] = useState("");
+  const [slide, setSlide] = useState<{ title: string; subtitle: string; points: string[] } | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [placeholder] = useState(() => DEMO_TOPICS[Math.floor(Math.random() * DEMO_TOPICS.length)]);
+
+  async function handleGenerate() {
+    const t = topic.trim() || placeholder;
+    if (!t) return;
+    setLoading(true);
+    setSlide(null);
+    try {
+      const res = await fetch("/api/demo-slide", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ topic: t }),
+      });
+      const data = await res.json();
+      if (data.slide) setSlide(data.slide);
+    } catch {}
+    setLoading(false);
+  }
+
+  return (
+    <div className="flex flex-col md:flex-row gap-6">
+      {/* Input */}
+      <div className="flex-1 flex flex-col gap-4">
+        <label className="text-sm text-zinc-400 font-medium">Enter any topic or idea</label>
+        <input
+          value={topic}
+          onChange={e => setTopic(e.target.value)}
+          onKeyDown={e => e.key === "Enter" && handleGenerate()}
+          placeholder={placeholder}
+          className="bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-white placeholder-zinc-600 focus:outline-none focus:border-purple-500 transition"
+        />
+        <div className="flex flex-wrap gap-2">
+          {DEMO_TOPICS.map(t => (
+            <button
+              key={t}
+              onClick={() => setTopic(t)}
+              className="text-xs px-3 py-1.5 bg-white/5 border border-white/10 rounded-full text-zinc-400 hover:text-white hover:border-purple-500 transition"
+            >
+              {t}
+            </button>
+          ))}
+        </div>
+        <button
+          onClick={handleGenerate}
+          disabled={loading}
+          className="mt-auto bg-purple-600 hover:bg-purple-500 disabled:opacity-50 transition rounded-2xl py-4 font-bold text-white shadow-[0_0_30px_rgba(168,85,247,0.3)]"
+        >
+          {loading ? "Generating..." : "Generate slide ✦"}
+        </button>
+        <p className="text-xs text-zinc-600 text-center">Free preview · No signup required · Full carousel after sign in</p>
+      </div>
+
+      {/* Preview */}
+      <div className="flex-1 flex items-center justify-center">
+        {!slide && !loading && (
+          <div className="w-full aspect-[4/5] max-w-[240px] rounded-[28px] border-2 border-dashed border-white/10 flex flex-col items-center justify-center gap-3 text-zinc-600">
+            <span className="text-4xl">✦</span>
+            <p className="text-sm text-center px-4">Your first slide will appear here</p>
+          </div>
+        )}
+        {loading && (
+          <div className="w-full aspect-[4/5] max-w-[240px] rounded-[28px] bg-white/5 border border-white/10 flex items-center justify-center">
+            <div className="flex flex-col items-center gap-3 text-zinc-400">
+              <div className="w-8 h-8 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" />
+              <p className="text-sm">AI is writing...</p>
+            </div>
+          </div>
+        )}
+        {slide && !loading && (
+          <div className="flex flex-col items-center gap-4 w-full">
+            <div className="w-full max-w-[240px] aspect-[4/5] rounded-[28px] bg-gradient-to-br from-purple-600 to-fuchsia-700 p-6 flex flex-col justify-between shadow-[0_0_40px_rgba(168,85,247,0.3)]">
+              <p className="text-[9px] font-bold uppercase tracking-widest text-white/40">Slide 1 of 6 · Viral</p>
+              <div className="flex flex-col gap-3">
+                <p className="text-white font-black text-base leading-tight">{slide.title}</p>
+                <p className="text-white/70 text-xs leading-relaxed">{slide.subtitle}</p>
+                {slide.points?.map((p, i) => (
+                  <p key={i} className="text-white/60 text-[10px] flex gap-1.5"><span className="text-purple-300">→</span>{p}</p>
+                ))}
+              </div>
+              <p className="text-[8px] text-white/20 font-bold uppercase tracking-wide self-end">Made with CarouselAI</p>
+            </div>
+            <Link
+              href="/create"
+              className="bg-purple-600 hover:bg-purple-500 transition px-6 py-3 rounded-2xl text-sm font-bold text-white shadow-[0_0_20px_rgba(168,85,247,0.3)]"
+            >
+              Get all 6 slides free →
+            </Link>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function Home() {
   const [isPro, setIsPro] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
@@ -166,6 +271,18 @@ export default function Home() {
             {/* Glow */}
             <div className="absolute -inset-4 bg-purple-600/10 rounded-3xl blur-2xl -z-10" />
           </div>
+        </div>
+      </section>
+
+      {/* Interactive Demo - no signup required */}
+      <section className="relative z-10 max-w-4xl mx-auto px-6 pb-20">
+        <div className="text-center mb-10">
+          <p className="text-purple-400 text-sm uppercase tracking-[0.3em] mb-3">Try it now</p>
+          <h2 className="text-4xl font-black mb-3">See it work in 10 seconds</h2>
+          <p className="text-zinc-400">No signup needed — type any topic and watch the AI generate your first slide</p>
+        </div>
+        <div className="bg-white/5 border border-white/10 rounded-[28px] p-8 backdrop-blur-xl">
+          <DemoWidget />
         </div>
       </section>
 
