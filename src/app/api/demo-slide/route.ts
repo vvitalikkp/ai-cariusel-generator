@@ -16,24 +16,23 @@ Return ONLY valid JSON (no markdown, no backticks):
 }`
 
   try {
-    const res = await fetch("https://api.anthropic.com/v1/messages", {
+    const res = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "x-api-key": process.env.ANTHROPIC_API_KEY!,
-        "anthropic-version": "2023-06-01",
+        "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`,
       },
       body: JSON.stringify({
-        model: "claude-haiku-4-5-20251001",
+        model: "gpt-4o-mini",
         max_tokens: 300,
         messages: [{ role: "user", content: prompt }],
+        response_format: { type: "json_object" },
       }),
     })
 
     const data = await res.json()
-    const text = data.content?.[0]?.text ?? ""
-    const clean = text.replace(/```json|```/g, "").trim()
-    const slide = JSON.parse(clean)
+    const text = data.choices?.[0]?.message?.content ?? ""
+    const slide = JSON.parse(text)
 
     return NextResponse.json({ slide })
   } catch (e) {
