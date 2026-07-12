@@ -46,14 +46,14 @@ function DemoWidget() {
           onChange={e => setTopic(e.target.value)}
           onKeyDown={e => e.key === "Enter" && handleGenerate()}
           placeholder={placeholder}
-          className="bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-white placeholder-zinc-600 focus:outline-none focus:border-purple-500 transition"
+          className="bg-white/5 border border-white/10 rounded-xl px-5 py-4 text-white placeholder-zinc-600 focus:outline-none focus:border-fuchsia-500 transition"
         />
         <div className="flex flex-wrap gap-2">
           {DEMO_TOPICS.map(t => (
             <button
               key={t}
               onClick={() => setTopic(t)}
-              className="text-xs px-3 py-1.5 bg-white/5 border border-white/10 rounded-full text-zinc-400 hover:text-white hover:border-purple-500 transition"
+              className="text-xs px-3 py-1.5 bg-white/5 border border-white/10 rounded-full text-zinc-400 hover:text-white hover:border-fuchsia-500 transition"
             >
               {t}
             </button>
@@ -62,7 +62,7 @@ function DemoWidget() {
         <button
           onClick={handleGenerate}
           disabled={loading}
-          className="mt-auto bg-purple-600 hover:bg-purple-500 disabled:opacity-50 transition rounded-2xl py-4 font-bold text-white shadow-[0_0_30px_rgba(168,85,247,0.3)]"
+          className="mt-auto bg-fuchsia-600 hover:bg-fuchsia-500 disabled:opacity-50 transition rounded-xl py-4 font-semibold text-white"
         >
           {loading ? "Generating..." : "Generate slide ✦"}
         </button>
@@ -72,15 +72,15 @@ function DemoWidget() {
       {/* Preview */}
       <div className="flex-1 flex items-center justify-center">
         {!slide && !loading && (
-          <div className="w-full aspect-[4/5] max-w-[240px] rounded-[28px] border-2 border-dashed border-white/10 flex flex-col items-center justify-center gap-3 text-zinc-600">
+          <div className="w-full aspect-[4/5] max-w-[240px] rounded-2xl border-2 border-dashed border-white/10 flex flex-col items-center justify-center gap-3 text-zinc-600">
             <span className="text-4xl">✦</span>
             <p className="text-sm text-center px-4">Your first slide will appear here</p>
           </div>
         )}
         {loading && (
-          <div className="w-full aspect-[4/5] max-w-[240px] rounded-[28px] bg-white/5 border border-white/10 flex items-center justify-center">
+          <div className="w-full aspect-[4/5] max-w-[240px] rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center">
             <div className="flex flex-col items-center gap-3 text-zinc-400">
-              <div className="w-8 h-8 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" />
+              <div className="w-8 h-8 border-2 border-fuchsia-500 border-t-transparent rounded-full animate-spin" />
               <p className="text-sm">AI is writing...</p>
             </div>
           </div>
@@ -100,7 +100,7 @@ function DemoWidget() {
             </div>
             <Link
               href="/create"
-              className="bg-purple-600 hover:bg-purple-500 transition px-6 py-3 rounded-2xl text-sm font-bold text-white shadow-[0_0_20px_rgba(168,85,247,0.3)]"
+              className="bg-fuchsia-600 hover:bg-fuchsia-500 transition px-6 py-3 rounded-xl text-sm font-semibold text-white"
             >
               Get all 6 slides free →
             </Link>
@@ -277,19 +277,19 @@ export default function Home() {
       {/* Interactive Demo - no signup required */}
       <section className="relative z-10 max-w-4xl mx-auto px-6 pb-20">
         <div className="text-center mb-10">
-          <p className="text-purple-400 text-sm uppercase tracking-[0.3em] mb-3">Try it now</p>
-          <h2 className="text-4xl font-black mb-3">See it work in 10 seconds</h2>
+          <p className="text-fuchsia-400 text-sm uppercase tracking-[0.3em] mb-3">Try it now</p>
+          <h2 className="text-4xl font-semibold tracking-tight mb-3">See it work in 10 seconds</h2>
           <p className="text-zinc-400">No signup needed — type any topic and watch the AI generate your first slide</p>
         </div>
-        <div className="bg-white/5 border border-white/10 rounded-[28px] p-8 backdrop-blur-xl">
+        <div className="bg-white/5 border border-white/10 rounded-2xl p-8">
           <DemoWidget />
         </div>
       </section>
 
       <section id="showcase" className="relative z-10 max-w-4xl mx-auto px-6 pb-20">
         <div className="text-center mb-12">
-          <p className="text-purple-400 text-sm uppercase tracking-[0.3em] mb-4">Showcase</p>
-          <h2 className="text-4xl font-black mb-4">See what creators generate</h2>
+          <p className="text-fuchsia-400 text-sm uppercase tracking-[0.3em] mb-4">Showcase</p>
+          <h2 className="text-4xl font-semibold tracking-tight mb-4">See what creators generate</h2>
           <p className="text-zinc-500">Real templates, real output — not mockups</p>
         </div>
         <div className="grid sm:grid-cols-2 gap-5">
@@ -330,8 +330,8 @@ export default function Home() {
       {/* Testimonials */}
       <section className="relative z-10 max-w-5xl mx-auto py-20 px-6">
         <div className="text-center mb-12">
-          <p className="text-purple-400 text-sm uppercase tracking-[0.3em] mb-4">What creators say</p>
-          <h2 className="text-4xl font-black mb-4">Loved by LinkedIn creators</h2>
+          <p className="text-fuchsia-400 text-sm uppercase tracking-[0.3em] mb-4">What creators say</p>
+          <h2 className="text-4xl font-semibold tracking-tight mb-4">Loved by LinkedIn creators</h2>
         </div>
         <div className="grid md:grid-cols-3 gap-5">
           <div className="bg-white/5 border border-white/10 rounded-[24px] p-6 flex flex-col gap-4">
@@ -368,28 +368,28 @@ export default function Home() {
             </div>
           </div>
         </div>
-        <p className="text-center text-zinc-600 text-xs mt-8">Replace these with your real reviews — <a href="mailto:hello@aicarousel.tech" className="text-purple-400 hover:text-purple-300 transition">share your story</a></p>
+        <p className="text-center text-zinc-600 text-xs mt-8">Replace these with your real reviews — <a href="mailto:hello@aicarousel.tech" className="text-fuchsia-400 hover:text-fuchsia-300 transition">share your story</a></p>
       </section>
 
       <section id="how-it-works" className="relative z-10 max-w-4xl mx-auto py-20 px-6">
         <div className="text-center mb-16">
-          <p className="text-purple-400 uppercase tracking-[0.3em] text-sm mb-4">How it works</p>
-          <h2 className="text-4xl font-black mb-4">3 steps to viral content</h2>
+          <p className="text-fuchsia-400 uppercase tracking-[0.3em] text-sm mb-4">How it works</p>
+          <h2 className="text-4xl font-semibold tracking-tight mb-4">3 steps to viral content</h2>
           <p className="text-zinc-400">From idea to LinkedIn carousel in seconds</p>
         </div>
         <div className="grid md:grid-cols-3 gap-8">
-          <div className="text-center p-8 bg-white/5 border border-white/10 rounded-[28px]">
-            <div className="text-5xl font-black text-purple-400 mb-4">01</div>
+          <div className="text-center p-8 bg-white/5 border border-white/10 rounded-2xl">
+            <div className="text-5xl font-semibold tracking-tight text-fuchsia-400 mb-4">01</div>
             <h3 className="text-xl font-bold mb-3">Paste your content</h3>
             <p className="text-zinc-400 text-sm">Paste any text, tweet, article or just type your idea</p>
           </div>
-          <div className="text-center p-8 bg-white/5 border border-white/10 rounded-[28px]">
-            <div className="text-5xl font-black text-purple-400 mb-4">02</div>
+          <div className="text-center p-8 bg-white/5 border border-white/10 rounded-2xl">
+            <div className="text-5xl font-semibold tracking-tight text-fuchsia-400 mb-4">02</div>
             <h3 className="text-xl font-bold mb-3">AI generates slides</h3>
             <p className="text-zinc-400 text-sm">AI creates Hook, Problem, Solution, CTA structure automatically</p>
           </div>
-          <div className="text-center p-8 bg-white/5 border border-white/10 rounded-[28px]">
-            <div className="text-5xl font-black text-purple-400 mb-4">03</div>
+          <div className="text-center p-8 bg-white/5 border border-white/10 rounded-2xl">
+            <div className="text-5xl font-semibold tracking-tight text-fuchsia-400 mb-4">03</div>
             <h3 className="text-xl font-bold mb-3">Export & post</h3>
             <p className="text-zinc-400 text-sm">Download PNG or PDF and post directly to LinkedIn</p>
           </div>
@@ -475,9 +475,9 @@ export default function Home() {
 
       {showSuccess && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center">
-          <div className="bg-zinc-900 border border-green-500/30 rounded-[32px] p-10 max-w-md text-center mx-4">
+          <div className="bg-zinc-900 border border-green-500/30 rounded-2xl p-10 max-w-md text-center mx-4">
             <div className="text-5xl mb-4">🎉</div>
-            <h2 className="text-3xl font-black mb-3">Welcome to Pro!</h2>
+            <h2 className="text-3xl font-semibold tracking-tight mb-3">Welcome to Pro!</h2>
             <p className="text-zinc-400 mb-8">Your account has been upgraded. Enjoy unlimited carousels and PDF export!</p>
             <Link href="/create" onClick={() => setShowSuccess(false)} className="w-full py-4 rounded-2xl bg-green-500 hover:bg-green-400 transition font-bold text-lg inline-block">Start Creating 🚀</Link>
           </div>
@@ -510,14 +510,14 @@ function PhLaunchSection() {
 
   return (
     <section id="ph-launch" className="relative z-10 max-w-2xl mx-auto px-6 py-20 text-center">
-      <div className="bg-white/[0.03] border border-white/10 rounded-[32px] p-10">
+      <div className="bg-white/[0.03] border border-white/10 rounded-2xl p-10">
         <div className="flex items-center justify-center gap-2 mb-6">
           <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M10 0C4.48 0 0 4.48 0 10s4.48 10 10 10 10-4.48 10-10S15.52 0 10 0zm2.5 10H10v2.5L6.25 10 10 7.5V10h2.5V7.5L16.25 10 12.5 12.5V10z" fill="#DA552F"/>
           </svg>
           <span className="text-sm font-bold text-orange-400 uppercase tracking-widest">Product Hunt</span>
         </div>
-        <h2 className="text-3xl font-black mb-3">We&apos;re launching soon</h2>
+        <h2 className="text-3xl font-semibold tracking-tight mb-3">We&apos;re launching soon</h2>
         <p className="text-zinc-400 mb-8 max-w-md mx-auto">
           Get notified when CarouselAI hits Product Hunt — and be first to upvote. Early supporters get a free month of Pro.
         </p>
