@@ -168,12 +168,12 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-black text-white overflow-x-hidden relative">
       <div className="fixed inset-0 pointer-events-none">
-        <div className="absolute top-[-200px] left-[-200px] w-[500px] h-[500px] bg-fuchsia-600/20 rounded-full blur-[140px]" />
-        <div className="absolute bottom-[-200px] right-[-200px] w-[500px] h-[500px] bg-purple-700/20 rounded-full blur-[140px]" />
+        <div className="absolute top-[-200px] left-[-200px] w-[500px] h-[500px] bg-fuchsia-600/8 rounded-full blur-[120px]" />
+        <div className="absolute bottom-[-200px] right-[-200px] w-[500px] h-[500px] bg-fuchsia-900/8 rounded-full blur-[120px]" />
       </div>
 
       <nav className="relative z-20 flex items-center justify-between px-4 sm:px-8 py-4 sm:py-6 max-w-7xl mx-auto gap-2">
-        <div className="text-lg sm:text-xl font-black tracking-tight whitespace-nowrap">CarouselAI</div>
+        <div className="text-lg sm:text-xl font-semibold tracking-tight whitespace-nowrap">CarouselAI</div>
         <div className="flex items-center gap-2 sm:gap-6 text-sm text-zinc-400 min-w-0">
           <a href="#how-it-works" className="hidden md:inline hover:text-white transition whitespace-nowrap">Features</a>
           <a href="#pricing" className="hidden md:inline hover:text-white transition whitespace-nowrap">Pricing</a>
@@ -182,7 +182,7 @@ export default function Home() {
           </Link>
           {isPro && <span className="hidden sm:inline px-3 py-1 rounded-full bg-fuchsia-500/20 border border-fuchsia-500/40 text-fuchsia-300 text-xs font-bold whitespace-nowrap">PRO</span>}
           <SignInButton />
-          <Link href="/create" className="bg-purple-600 hover:bg-purple-500 text-white px-3 sm:px-5 py-2 rounded-lg text-sm font-bold transition whitespace-nowrap">
+          <Link href="/create" className="bg-fuchsia-600 hover:bg-fuchsia-500 text-white px-3 sm:px-5 py-2 rounded-lg text-sm font-semibold transition whitespace-nowrap">
             <span className="sm:hidden">Create</span>
             <span className="hidden sm:inline">Create Carousel →</span>
           </Link>
@@ -192,10 +192,10 @@ export default function Home() {
       <section className="relative z-10 max-w-7xl mx-auto px-6 pt-20 pb-32">
         <div className="grid lg:grid-cols-2 gap-16 items-center">
           <div>
-            <div className="mb-6 inline-block px-5 py-2 rounded-full border border-white/10 bg-white/5 backdrop-blur-xl text-sm">
+            <div className="mb-6 inline-flex items-center gap-2 px-4 py-1.5 rounded-md border border-fuchsia-500/30 text-fuchsia-400 text-xs font-medium uppercase tracking-wider">
               ⚡ From idea to carousel in 30 seconds
             </div>
-            <h1 className="text-6xl font-black leading-tight mb-6 tracking-tight">
+            <h1 className="text-6xl font-semibold leading-[1.05] mb-6 tracking-tighter">
               Turn any idea into<br />a LinkedIn carousel<br />people actually share
             </h1>
             <p className="text-zinc-400 text-xl mb-6 max-w-xl">
@@ -209,7 +209,7 @@ export default function Home() {
             <div className="flex items-center gap-4">
               <Link
                 href="/create"
-                className="px-8 py-4 rounded-2xl bg-purple-600 hover:bg-purple-500 transition-all font-bold shadow-[0_0_30px_rgba(168,85,247,0.4)] inline-block"
+                className="px-8 py-4 rounded-xl bg-fuchsia-600 hover:bg-fuchsia-500 transition-all font-semibold inline-block"
               >
                 Create Your Carousel ✦
               </Link>
@@ -224,7 +224,7 @@ export default function Home() {
 
           <div className="relative hidden lg:block">
             {/* Browser frame */}
-            <div className="rounded-2xl overflow-hidden border border-white/10 shadow-[0_0_80px_rgba(168,85,247,0.15)] bg-[#0d0d0d]">
+            <div className="rounded-2xl overflow-hidden border border-white/10 bg-[#0d0d0d]">
               {/* Browser chrome */}
               <div className="flex items-center gap-2 px-4 py-3 border-b border-white/5 bg-white/3">
                 <div className="w-3 h-3 rounded-full bg-white/10" />
@@ -269,7 +269,7 @@ export default function Home() {
               </div>
             </div>
             {/* Glow */}
-            <div className="absolute -inset-4 bg-purple-600/10 rounded-3xl blur-2xl -z-10" />
+            <div className="absolute -inset-4 bg-fuchsia-600/5 rounded-3xl blur-2xl -z-10" />
           </div>
         </div>
       </section>
@@ -398,15 +398,15 @@ export default function Home() {
 
       <section id="pricing" className="relative z-10 max-w-6xl mx-auto py-32 px-6">
         <div className="text-center mb-16">
-          <p className="text-pink-400 uppercase tracking-[0.3em] text-sm mb-4">Pricing</p>
-          <h2 className="text-5xl font-black mb-4">Simple pricing<br />for creators</h2>
+          <p className="text-fuchsia-400 uppercase tracking-[0.3em] text-sm mb-4">Pricing</p>
+          <h2 className="text-5xl font-semibold tracking-tight mb-4">Simple pricing<br />for creators</h2>
           <p className="text-zinc-400">Start free. Upgrade when you&apos;re ready to grow faster.</p>
         </div>
         <div className="grid md:grid-cols-2 gap-6 max-w-3xl mx-auto">
-          <div className="bg-white/5 border border-white/10 rounded-[32px] p-8 backdrop-blur-xl flex flex-col">
+          <div className="bg-white/5 border border-white/10 rounded-2xl p-8 flex flex-col">
             <h3 className="text-xl font-bold mb-2">Free</h3>
             <p className="text-zinc-500 text-sm mb-6">Perfect to try it out</p>
-            <p className="text-5xl font-black mb-1">$0</p>
+            <p className="text-5xl font-semibold tracking-tight mb-1">$0</p>
             <p className="text-zinc-600 text-sm mb-8">forever</p>
             <ul className="space-y-3 text-zinc-300 mb-8 flex-1">
               <li className="flex items-center gap-2"><span className="text-green-400">✓</span> 3 carousels / month</li>
@@ -418,15 +418,15 @@ export default function Home() {
               <li className="flex items-center gap-2 text-zinc-600"><span>✗</span> Brand Kit (logo, colors, font)</li>
               <li className="flex items-center gap-2 text-zinc-600"><span>✗</span> LinkedIn Post generator</li>
             </ul>
-            <Link href="/create" className="w-full py-4 rounded-2xl bg-white/10 hover:bg-white/20 transition font-bold text-center">Start Free</Link>
+            <Link href="/create" className="w-full py-4 rounded-xl bg-white/10 hover:bg-white/20 transition font-semibold text-center">Start Free</Link>
           </div>
 
-          <div className="relative bg-gradient-to-br from-fuchsia-600/30 to-purple-600/20 border border-fuchsia-500/40 rounded-[32px] p-8 shadow-[0_0_60px_rgba(217,70,239,0.25)] flex flex-col">
+          <div className="relative bg-fuchsia-950/20 border border-fuchsia-500/40 rounded-2xl p-8 flex flex-col">
             <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-fuchsia-500 text-white text-xs font-black px-4 py-1.5 rounded-full uppercase tracking-widest whitespace-nowrap">MOST POPULAR</div>
             <h3 className="text-xl font-bold mb-2">Pro</h3>
             <p className="text-zinc-400 text-sm mb-6">For creators who post consistently</p>
             <div className="flex items-end gap-1 mb-1">
-              <p className="text-5xl font-black">$24</p>
+              <p className="text-5xl font-semibold tracking-tight">$24</p>
               <p className="text-zinc-400 text-sm mb-2">/month</p>
             </div>
             <p className="text-zinc-400 text-sm mb-8">or $19/mo billed annually — save 21%</p>
@@ -440,7 +440,7 @@ export default function Home() {
               <li className="flex items-center gap-2"><span className="text-fuchsia-400">✓</span> <strong>LinkedIn Post generator</strong></li>
               <li className="flex items-center gap-2"><span className="text-fuchsia-400">✓</span> <strong>Priority support</strong></li>
             </ul>
-            <button onClick={() => handleUpgrade("pro_monthly")} className="w-full py-4 rounded-2xl bg-fuchsia-500 hover:bg-fuchsia-400 transition font-bold shadow-[0_0_30px_rgba(217,70,239,0.4)] mb-2">Get Pro — $24/mo</button>
+            <button onClick={() => handleUpgrade("pro_monthly")} className="w-full py-4 rounded-xl bg-fuchsia-500 hover:bg-fuchsia-400 transition font-semibold mb-2">Get Pro — $24/mo</button>
             <button onClick={() => handleUpgrade("pro_annual")} className="w-full py-2 text-sm text-fuchsia-300 hover:text-fuchsia-200 transition">Save 21% — $19/mo billed yearly</button>
           </div>
         </div>
