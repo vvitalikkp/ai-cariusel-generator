@@ -196,10 +196,10 @@ export default function Home() {
               ⚡ From idea to carousel in 30 seconds
             </div>
             <h1 className="text-6xl font-semibold leading-[1.05] mb-6 tracking-tighter">
-              Turn any idea into<br />a LinkedIn carousel<br />people actually share
+              LinkedIn carousels for<br />founders and consultants<br />who don&apos;t have a design team
             </h1>
             <p className="text-zinc-400 text-xl mb-6 max-w-xl">
-              Paste a tweet, YouTube link, article, or idea. AI writes the hook, structures the slides, and designs the carousel — ready to post in seconds.
+              Paste an idea, article, or YouTube link. Get a carousel in 30 seconds — no Canva, no freelancer, no waiting.
             </p>
             <div className="flex flex-col gap-2 mb-8 text-sm text-zinc-300">
               <span className="flex items-center gap-2"><span className="text-green-400">✓</span> 25 premium templates, Brand Kit, 4 AI tones</span>
