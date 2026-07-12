@@ -111,6 +111,32 @@ function DemoWidget() {
   );
 }
 
+function CopyEmailButton({ email, label }: { email: string; label: string }) {
+  const [copied, setCopied] = useState(false);
+
+  async function handleCopy() {
+    try {
+      await navigator.clipboard.writeText(email);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // Clipboard API unavailable (old browser / no permission) — fall back
+      // to a plain mailto so the click still does *something* useful.
+      window.location.href = `mailto:${email}`;
+    }
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={handleCopy}
+      className="text-fuchsia-400 hover:text-fuchsia-300 transition bg-transparent border-0 p-0 cursor-pointer align-baseline"
+    >
+      {copied ? "Copied! ✓" : label}
+    </button>
+  );
+}
+
 export default function Home() {
   const [isPro, setIsPro] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
@@ -368,7 +394,7 @@ export default function Home() {
             </div>
           </div>
         </div>
-        <p className="text-center text-zinc-600 text-xs mt-8">Replace these with your real reviews — <a href="mailto:hello@aicarousel.tech" className="text-fuchsia-400 hover:text-fuchsia-300 transition">share your story</a></p>
+        <p className="text-center text-zinc-600 text-xs mt-8">Replace these with your real reviews — <CopyEmailButton email="hello@aicarousel.tech" label="share your story" /></p>
       </section>
 
       <section id="how-it-works" className="relative z-10 max-w-4xl mx-auto py-20 px-6">
