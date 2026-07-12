@@ -491,7 +491,10 @@ export default function Home() {
       <PhLaunchSection />
 
       <footer className="relative z-10 max-w-7xl mx-auto px-6 py-10 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-zinc-500">
-        <span>© 2026 CarouselAI</span>
+        <span className="flex items-center gap-2">
+          <svg width="14" height="14" viewBox="0 0 88 88" fill="none" aria-hidden="true"><path d="M64 20H30L18 44L30 68H64V54H40L34 44L40 34H64V20Z" fill="currentColor"/></svg>
+          © 2026 CarouselAI
+        </span>
         <div className="flex items-center gap-6">
           <Link href="/privacy" className="hover:text-white transition">Privacy Policy</Link>
           <Link href="/terms" className="hover:text-white transition">Terms of Service</Link>
