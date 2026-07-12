@@ -199,7 +199,7 @@ export default function Home() {
       </div>
 
       <nav className="relative z-20 flex items-center justify-between px-4 sm:px-8 py-4 sm:py-6 max-w-7xl mx-auto gap-2">
-        <div className="text-lg sm:text-xl font-semibold tracking-tight whitespace-nowrap">CarouselAI</div>
+        <div className="flex items-center gap-2 text-lg sm:text-xl font-semibold tracking-tight whitespace-nowrap"><svg width="20" height="20" viewBox="0 0 88 88" fill="none" aria-hidden="true"><path d="M64 20H30L18 44L30 68H64V54H40L34 44L40 34H64V20Z" fill="#d946ef"/></svg>CarouselAI</div>
         <div className="flex items-center gap-2 sm:gap-6 text-sm text-zinc-400 min-w-0">
           <a href="#how-it-works" className="hidden md:inline hover:text-white transition whitespace-nowrap">Features</a>
           <a href="#pricing" className="hidden md:inline hover:text-white transition whitespace-nowrap">Pricing</a>

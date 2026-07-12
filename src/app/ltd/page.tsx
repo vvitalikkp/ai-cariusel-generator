@@ -97,7 +97,7 @@ export default function LtdPage() {
     <div className="min-h-screen bg-[#080808] text-white">
       {/* Nav */}
       <nav className="flex items-center justify-between px-4 sm:px-8 py-4 max-w-5xl mx-auto">
-        <Link href="/" className="text-lg font-black tracking-tight">CarouselAI</Link>
+        <Link href="/" className="flex items-center gap-2 text-lg font-semibold tracking-tight"><svg width="18" height="18" viewBox="0 0 88 88" fill="none" aria-hidden="true"><path d="M64 20H30L18 44L30 68H64V54H40L34 44L40 34H64V20Z" fill="#d946ef"/></svg>CarouselAI</Link>
         <Link href="/create" className="text-sm text-zinc-400 hover:text-white transition">
           Try free →
         </Link>

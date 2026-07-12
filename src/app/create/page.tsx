@@ -425,7 +425,7 @@ export default function Create() {
       </div>
 
       <nav className="relative z-20 flex flex-wrap items-center justify-between px-4 sm:px-8 py-4 sm:py-6 max-w-7xl mx-auto gap-2">
-        <Link href="/" className="text-lg sm:text-xl font-black tracking-tight whitespace-nowrap">CarouselAI</Link>
+        <Link href="/" className="flex items-center gap-2 text-lg sm:text-xl font-semibold tracking-tight whitespace-nowrap"><svg width="20" height="20" viewBox="0 0 88 88" fill="none" aria-hidden="true"><path d="M64 20H30L18 44L30 68H64V54H40L34 44L40 34H64V20Z" fill="#d946ef"/></svg>CarouselAI</Link>
         <div className="flex items-center gap-2 sm:gap-4 flex-wrap justify-end">
           {isPro && (
             <>
