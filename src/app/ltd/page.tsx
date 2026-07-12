@@ -1,8 +1,7 @@
 "use client";
 
-import { useEffect, useState, Suspense } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
 import { useSession, signIn } from "next-auth/react";
 
 const TOTAL_SPOTS = 500;
@@ -44,24 +43,24 @@ const FAQ = [
 ];
 
 export default function LtdPage() {
-  return (
-    <Suspense fallback={<div className="min-h-screen bg-[#080808]" />}>
-      <LtdPageInner />
-    </Suspense>
-  );
-}
-
-function LtdPageInner() {
   const { data: session } = useSession();
-  const searchParams = useSearchParams();
   const [loading, setLoading] = useState(false);
   const [soldCount, setSoldCount] = useState(0);
   const [carouselCount, setCarouselCount] = useState(0);
+  const [success, setSuccess] = useState(false);
+  const [canceled, setCanceled] = useState(false);
   const spotsLeft = TOTAL_SPOTS - soldCount;
   const soldOut = spotsLeft <= 0;
 
-  const success = searchParams.get("success") === "true";
-  const canceled = searchParams.get("canceled") === "true";
+  useEffect(() => {
+    // Read query params client-side only — avoids wrapping the page in a
+    // Suspense boundary for useSearchParams(), which was causing Next.js to
+    // statically prerender just the empty fallback (blank page for any
+    // non-JS client / crawler / share preview / first paint).
+    const params = new URLSearchParams(window.location.search);
+    setSuccess(params.get("success") === "true");
+    setCanceled(params.get("canceled") === "true");
+  }, []);
 
   useEffect(() => {
     fetch("/api/ltd-count")
