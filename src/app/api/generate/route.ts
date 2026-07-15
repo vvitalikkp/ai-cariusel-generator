@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server"
 import OpenAI from "openai"
 import { supabase } from "@/lib/supabase"
-
-const FREE_LIMIT = 3
+import { FREE_LIMIT, monthlyCountFromRow } from "@/lib/limits"
 
 const TONE_PRESETS: Record<string, string> = {
   Storytelling: "Write in a first-person, narrative voice. Use a personal anecdote or relatable journey arc, with vulnerability and concrete moments — make it feel like a real story, not a lecture.",
@@ -21,7 +20,7 @@ export async function POST(req: Request) {
 
     const openai = new OpenAI({ apiKey })
     const body = await req.json()
-    const { idea, style, tone, email, mode } = body
+    const { idea, style, tone, email, mode, isRegenerate } = body
     const toneInstruction = TONE_PRESETS[tone] || TONE_PRESETS.Authority
 
     if (!email) {
@@ -64,12 +63,7 @@ Return only the post text, no extra explanation.`,
       return NextResponse.json({ post })
     }
 
-    const lastUpdate = row?.updated_at ? new Date(row.updated_at) : null
-    const now = new Date()
-    const sameMonth = !!lastUpdate &&
-      lastUpdate.getUTCFullYear() === now.getUTCFullYear() &&
-      lastUpdate.getUTCMonth() === now.getUTCMonth()
-    const monthlyCount = sameMonth ? (row?.count || 0) : 0
+    const monthlyCount = monthlyCountFromRow(row)
 
     if (!isPro && monthlyCount >= FREE_LIMIT) {
       return NextResponse.json({ error: "limit_reached" })
@@ -104,14 +98,20 @@ Return ONLY the JSON array, no markdown, no extra text.`,
     const clean = text.replace(/```json|```/g, "").trim()
     const slides = JSON.parse(clean)
 
+    // A regenerate call (redoing one slide within an already-generated carousel)
+    // still requires quota (so it can't be spammed to bypass the free-tier cap),
+    // but it shouldn't burn an extra "carousel" from the monthly count — only a
+    // brand-new carousel does that.
+    const nextCount = isRegenerate ? monthlyCount : monthlyCount + 1
+
     await supabase
       .from("generation_counts")
       .upsert(
-        { email, count: monthlyCount + 1, is_pro: isPro, updated_at: new Date().toISOString() },
+        { email, count: nextCount, is_pro: isPro, updated_at: new Date().toISOString() },
         { onConflict: "email" }
       )
 
-    return NextResponse.json({ slides, isPro })
+    return NextResponse.json({ slides, isPro, used: nextCount, limit: FREE_LIMIT })
   } catch (e) {
     console.error(e)
     return NextResponse.json({ error: String(e) }, { status: 500 })

@@ -40,6 +40,8 @@ export default function Create() {
   const [brandSaved, setBrandSaved] = useState(false);
   const [showPaywall, setShowPaywall] = useState(false);
   const [isPro, setIsPro] = useState(false);
+  const [usedCount, setUsedCount] = useState(0);
+  const [freeLimit, setFreeLimit] = useState(3);
   const [showIdeaBank, setShowIdeaBank] = useState(false);
   const [showUrlImport, setShowUrlImport] = useState(false);
   const [importUrl, setImportUrl] = useState("");
@@ -90,6 +92,8 @@ export default function Create() {
         });
         const data = await res.json();
         setIsPro(data.isPro || false);
+        if (typeof data.used === "number") setUsedCount(data.used);
+        if (typeof data.limit === "number") setFreeLimit(data.limit);
       } catch (e) {
         console.error(e);
       }
@@ -214,6 +218,7 @@ export default function Create() {
         setLoading(false);
         return;
       }
+      if (typeof data.used === "number") setUsedCount(data.used);
       setSlides(data.slides || []);
     } catch (e) {
       console.error(e);
@@ -238,7 +243,7 @@ export default function Create() {
       const res = await fetch("/api/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ idea, style, tone, email: session.user.email }),
+        body: JSON.stringify({ idea, style, tone, email: session.user.email, isRegenerate: true }),
       });
       const data = await res.json();
       if (data.error === "limit_reached") {
@@ -249,6 +254,7 @@ export default function Create() {
         signIn();
         return;
       }
+      if (typeof data.used === "number") setUsedCount(data.used);
       if (data.slides?.length > 0) {
         const newSlide = data.slides[index] || data.slides[0];
         setSlides((prev) => {
@@ -576,6 +582,16 @@ export default function Create() {
               )}
             </button>
           </div>
+          {!isPro && (
+            <p className="text-center text-xs text-zinc-500 mt-3">
+              {usedCount >= freeLimit
+                ? "You've used all your free carousels this month."
+                : `${freeLimit - usedCount} of ${freeLimit} free carousel${freeLimit === 1 ? "" : "s"} left this month.`}{" "}
+              <Link href="/#pricing" className="text-purple-400 hover:text-purple-300 underline">
+                Upgrade for unlimited
+              </Link>
+            </p>
+          )}
         </div>
       </section>
 
