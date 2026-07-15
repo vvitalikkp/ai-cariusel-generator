@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 import OpenAI from "openai"
 import { supabase } from "@/lib/supabase"
-import { FREE_LIMIT, monthlyCountFromRow } from "@/lib/limits"
+import { FREE_LIMIT, DAILY_FAIR_USE_LIMIT, monthlyCountFromRow, dailyCountFromRow } from "@/lib/limits"
 
 const TONE_PRESETS: Record<string, string> = {
   Storytelling: "Write in a first-person, narrative voice. Use a personal anecdote or relatable journey arc, with vulnerability and concrete moments — make it feel like a real story, not a lecture.",
@@ -29,11 +29,21 @@ export async function POST(req: Request) {
 
     const { data: row } = await supabase
       .from("generation_counts")
-      .select("count, is_pro, updated_at")
+      .select("count, is_pro, updated_at, daily_count, daily_updated_at")
       .eq("email", email)
       .single()
 
     const isPro = row?.is_pro || false
+
+    // Fair-use cap on paid accounts (Pro + LTD). This is not the marketing
+    // "unlimited" — it exists to protect unit economics on every GPT-4o call.
+    // Applies to both carousel and LinkedIn-post generation, since both hit
+    // the paid model. Free-tier users never get near this — they're already
+    // capped at FREE_LIMIT/month.
+    const dailyCount = dailyCountFromRow(row)
+    if (isPro && dailyCount >= DAILY_FAIR_USE_LIMIT) {
+      return NextResponse.json({ error: "daily_limit_reached" })
+    }
 
     if (mode === "linkedin_post" && !isPro) {
       return NextResponse.json({ error: "pro_required" })
@@ -60,6 +70,14 @@ Return only the post text, no extra explanation.`,
         ]
       })
       const post = response.choices[0].message.content?.trim() || ""
+
+      await supabase
+        .from("generation_counts")
+        .upsert(
+          { email, is_pro: isPro, daily_count: dailyCount + 1, daily_updated_at: new Date().toISOString() },
+          { onConflict: "email" }
+        )
+
       return NextResponse.json({ post })
     }
 
@@ -101,17 +119,25 @@ Return ONLY the JSON array, no markdown, no extra text.`,
     // A regenerate call (redoing one slide within an already-generated carousel)
     // still requires quota (so it can't be spammed to bypass the free-tier cap),
     // but it shouldn't burn an extra "carousel" from the monthly count — only a
-    // brand-new carousel does that.
-    const nextCount = isRegenerate ? monthlyCount : monthlyCount + 1
+    // brand-new carousel does that. The daily fair-use count, on the other hand,
+    // always increments — it tracks raw API cost, not carousels.
+    const nextMonthlyCount = isRegenerate ? monthlyCount : monthlyCount + 1
 
     await supabase
       .from("generation_counts")
       .upsert(
-        { email, count: nextCount, is_pro: isPro, updated_at: new Date().toISOString() },
+        {
+          email,
+          count: nextMonthlyCount,
+          is_pro: isPro,
+          updated_at: new Date().toISOString(),
+          daily_count: dailyCount + 1,
+          daily_updated_at: new Date().toISOString(),
+        },
         { onConflict: "email" }
       )
 
-    return NextResponse.json({ slides, isPro, used: nextCount, limit: FREE_LIMIT })
+    return NextResponse.json({ slides, isPro, used: nextMonthlyCount, limit: FREE_LIMIT })
   } catch (e) {
     console.error(e)
     return NextResponse.json({ error: String(e) }, { status: 500 })

@@ -42,6 +42,7 @@ export default function Create() {
   const [isPro, setIsPro] = useState(false);
   const [usedCount, setUsedCount] = useState(0);
   const [freeLimit, setFreeLimit] = useState(3);
+  const [dailyLimitError, setDailyLimitError] = useState(false);
   const [showIdeaBank, setShowIdeaBank] = useState(false);
   const [showUrlImport, setShowUrlImport] = useState(false);
   const [importUrl, setImportUrl] = useState("");
@@ -213,11 +214,17 @@ export default function Create() {
         setLoading(false);
         return;
       }
+      if (data.error === "daily_limit_reached") {
+        setDailyLimitError(true);
+        setLoading(false);
+        return;
+      }
       if (data.error === "sign_in_required") {
         signIn();
         setLoading(false);
         return;
       }
+      setDailyLimitError(false);
       if (typeof data.used === "number") setUsedCount(data.used);
       setSlides(data.slides || []);
     } catch (e) {
@@ -250,10 +257,15 @@ export default function Create() {
         setShowPaywall(true);
         return;
       }
+      if (data.error === "daily_limit_reached") {
+        setDailyLimitError(true);
+        return;
+      }
       if (data.error === "sign_in_required") {
         signIn();
         return;
       }
+      setDailyLimitError(false);
       if (typeof data.used === "number") setUsedCount(data.used);
       if (data.slides?.length > 0) {
         const newSlide = data.slides[index] || data.slides[0];
@@ -293,6 +305,11 @@ export default function Create() {
       const data = await res.json();
       if (data.error === "pro_required") {
         setShowPaywall(true);
+        setLoadingPost(false);
+        return;
+      }
+      if (data.error === "daily_limit_reached") {
+        setDailyLimitError(true);
         setLoadingPost(false);
         return;
       }
@@ -590,6 +607,11 @@ export default function Create() {
               <Link href="/#pricing" className="text-purple-400 hover:text-purple-300 underline">
                 Upgrade for unlimited
               </Link>
+            </p>
+          )}
+          {dailyLimitError && (
+            <p className="text-center text-xs text-amber-400 mt-3">
+              You&apos;ve hit today&apos;s fair-use limit (very high — this is meant to catch automated abuse, not real use). It resets tomorrow. Need more? Email support.
             </p>
           )}
         </div>
