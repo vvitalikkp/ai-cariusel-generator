@@ -7,7 +7,7 @@ export const FREE_LIMIT = 3
 // should never be visible to a legitimate user.
 export const DAILY_FAIR_USE_LIMIT = 50
 
-export function monthlyCountFromRow(row: { count?: number; updated_at?: string } | null | undefined): number {
+export function monthlyCountFromRow(row: { count?: number | null; updated_at?: string | null } | null | undefined): number {
   const lastUpdate = row?.updated_at ? new Date(row.updated_at) : null
   const now = new Date()
   const sameMonth = !!lastUpdate &&
@@ -16,7 +16,7 @@ export function monthlyCountFromRow(row: { count?: number; updated_at?: string }
   return sameMonth ? (row?.count || 0) : 0
 }
 
-export function dailyCountFromRow(row: { daily_count?: number; daily_updated_at?: string } | null | undefined): number {
+export function dailyCountFromRow(row: { daily_count?: number | null; daily_updated_at?: string | null } | null | undefined): number {
   const lastUpdate = row?.daily_updated_at ? new Date(row.daily_updated_at) : null
   const now = new Date()
   const sameDay = !!lastUpdate &&
