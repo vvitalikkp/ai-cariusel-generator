@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server"
 import OpenAI from "openai"
 import { supabase } from "@/lib/supabase"
-import { FREE_LIMIT, DAILY_FAIR_USE_LIMIT, monthlyCountFromRow, dailyCountFromRow } from "@/lib/limits"
+import { FREE_LIMIT, DAILY_FAIR_USE_LIMIT, REFERRAL_BONUS, monthlyCountFromRow, dailyCountFromRow, effectiveFreeLimit } from "@/lib/limits"
+import { getReferralCode } from "@/lib/referral"
 
 const TONE_PRESETS: Record<string, string> = {
   Storytelling: "Write in a first-person, narrative voice. Use a personal anecdote or relatable journey arc, with vulnerability and concrete moments — make it feel like a real story, not a lecture.",
@@ -20,7 +21,7 @@ export async function POST(req: Request) {
 
     const openai = new OpenAI({ apiKey })
     const body = await req.json()
-    const { idea, style, tone, email, mode, isRegenerate } = body
+    const { idea, style, tone, email, mode, isRegenerate, ref } = body
     const toneInstruction = TONE_PRESETS[tone] || TONE_PRESETS.Authority
 
     if (!email) {
@@ -29,9 +30,34 @@ export async function POST(req: Request) {
 
     const { data: row } = await supabase
       .from("generation_counts")
-      .select("count, is_pro, updated_at, daily_count, daily_updated_at")
+      .select("count, is_pro, updated_at, daily_count, daily_updated_at, bonus_generations, referred_by, referral_code")
       .eq("email", email)
       .single()
+
+    // Referral attribution — double-sided, runs at most once per referred
+    // user (the very first time they hit this endpoint with a ?ref= code
+    // still in localStorage). Guarded on `referred_by` being unset so
+    // re-generating, clearing localStorage, or revisiting the link later
+    // can't re-credit either side. Self-referrals (own code) are ignored,
+    // not erroed. The referred user's own +REFERRAL_BONUS is applied via
+    // the upsert further down (referredBonus), since their row may not
+    // exist yet on their very first generation.
+    const myCode = getReferralCode(email)
+    let referredBonus = 0
+    if (ref && !row?.referred_by && ref !== myCode) {
+      const { data: referrer } = await supabase
+        .from("generation_counts")
+        .select("email, bonus_generations")
+        .eq("referral_code", ref)
+        .single()
+      if (referrer && referrer.email !== email) {
+        await supabase
+          .from("generation_counts")
+          .update({ bonus_generations: (referrer.bonus_generations || 0) + REFERRAL_BONUS })
+          .eq("email", referrer.email)
+        referredBonus = REFERRAL_BONUS
+      }
+    }
 
     const isPro = row?.is_pro || false
 
@@ -74,7 +100,7 @@ Return only the post text, no extra explanation.`,
       await supabase
         .from("generation_counts")
         .upsert(
-          { email, is_pro: isPro, daily_count: dailyCount + 1, daily_updated_at: new Date().toISOString() },
+          { email, is_pro: isPro, daily_count: dailyCount + 1, daily_updated_at: new Date().toISOString(), referral_code: row?.referral_code || myCode },
           { onConflict: "email" }
         )
 
@@ -82,8 +108,9 @@ Return only the post text, no extra explanation.`,
     }
 
     const monthlyCount = monthlyCountFromRow(row)
+    const myFreeLimit = effectiveFreeLimit(row)
 
-    if (!isPro && monthlyCount >= FREE_LIMIT) {
+    if (!isPro && monthlyCount >= myFreeLimit) {
       return NextResponse.json({ error: "limit_reached" })
     }
 
@@ -133,11 +160,14 @@ Return ONLY the JSON array, no markdown, no extra text.`,
           updated_at: new Date().toISOString(),
           daily_count: dailyCount + 1,
           daily_updated_at: new Date().toISOString(),
+          referral_code: row?.referral_code || myCode,
+          referred_by: row?.referred_by || (ref && ref !== myCode ? ref : null),
+          bonus_generations: (row?.bonus_generations || 0) + referredBonus,
         },
         { onConflict: "email" }
       )
 
-    return NextResponse.json({ slides, isPro, used: nextMonthlyCount, limit: FREE_LIMIT })
+    return NextResponse.json({ slides, isPro, used: nextMonthlyCount, limit: myFreeLimit + referredBonus })
   } catch (e) {
     console.error(e)
     return NextResponse.json({ error: String(e) }, { status: 500 })

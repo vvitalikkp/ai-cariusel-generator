@@ -7,6 +7,13 @@ export const FREE_LIMIT = 3
 // should never be visible to a legitimate user.
 export const DAILY_FAIR_USE_LIMIT = 50
 
+// Referral bonus: each successful referral permanently raises the referrer's
+// free monthly cap by this many carousels (on top of FREE_LIMIT). It's a
+// standing increase to the cap, not a spendable one-off credit pool — simpler
+// to reason about and to display ("you get 3 free/mo + 3 per friend you
+// invite" is one sentence, no separate balance to track or expire).
+export const REFERRAL_BONUS = 3
+
 export function monthlyCountFromRow(row: { count?: number | null; updated_at?: string | null } | null | undefined): number {
   const lastUpdate = row?.updated_at ? new Date(row.updated_at) : null
   const now = new Date()
@@ -24,4 +31,8 @@ export function dailyCountFromRow(row: { daily_count?: number | null; daily_upda
     lastUpdate.getUTCMonth() === now.getUTCMonth() &&
     lastUpdate.getUTCDate() === now.getUTCDate()
   return sameDay ? (row?.daily_count || 0) : 0
+}
+
+export function effectiveFreeLimit(row: { bonus_generations?: number | null } | null | undefined): number {
+  return FREE_LIMIT + (row?.bonus_generations || 0)
 }

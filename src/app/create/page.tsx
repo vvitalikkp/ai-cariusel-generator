@@ -9,6 +9,7 @@ import { saveAs } from "file-saver";
 import { SignInButton } from "../components/SignInButton";
 import jsPDF from "jspdf";
 import { TEMPLATES, TONES, IDEA_BANK, type TemplateKey, type ToneKey } from "@/lib/templates";
+import { getReferralCode } from "@/lib/referral";
 
 interface Slide {
   title: string;
@@ -22,6 +23,32 @@ const TOUR_STEPS = [
   { target: "tour-idea", title: "Type your idea", desc: "Paste a tweet, article, or just type an idea. No idea? Grab one from the idea bank." },
   { target: "tour-generate", title: "Generate", desc: "Click Generate and get 6 polished, editable slides in seconds." },
 ];
+
+function ReferralLink({ email }: { email: string }) {
+  const [copied, setCopied] = useState(false);
+  const link = `https://www.aicarousel.tech/create?ref=${getReferralCode(email)}`;
+
+  async function handleCopy() {
+    try {
+      await navigator.clipboard.writeText(link);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // no-op — clipboard permission denied is not worth interrupting the
+      // user over, the link is also visible as plain text right next to it
+    }
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={handleCopy}
+      className="text-fuchsia-400 hover:text-fuchsia-300 transition bg-transparent border-0 p-0 cursor-pointer underline underline-offset-2"
+    >
+      {copied ? "Link copied! ✓" : "Copy your invite link"}
+    </button>
+  );
+}
 
 export default function Create() {
   const [idea, setIdea] = useState("");
@@ -61,6 +88,15 @@ export default function Create() {
     if (savedLogo) setLogoUrl(savedLogo);
     const savedFont = localStorage.getItem("carouselai_font");
     if (savedFont) setCardFont(savedFont);
+
+    // Referral capture: first-touch only. If someone lands via a friend's
+    // link, remember the code until their first generation actually credits
+    // it server-side — don't overwrite it if they already have one saved
+    // (e.g. they clicked their own share link back to themselves later).
+    const refFromUrl = new URLSearchParams(window.location.search).get("ref");
+    if (refFromUrl && !localStorage.getItem("carouselai_ref")) {
+      localStorage.setItem("carouselai_ref", refFromUrl);
+    }
   }, []);
 
   useEffect(() => {
@@ -206,7 +242,7 @@ export default function Create() {
       const res = await fetch("/api/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ idea, style, tone, email: session.user.email }),
+        body: JSON.stringify({ idea, style, tone, email: session.user.email, ref: localStorage.getItem("carouselai_ref") }),
       });
       const data = await res.json();
       if (data.error === "limit_reached") {
@@ -226,6 +262,7 @@ export default function Create() {
       }
       setDailyLimitError(false);
       if (typeof data.used === "number") setUsedCount(data.used);
+      if (typeof data.limit === "number") setFreeLimit(data.limit);
       setSlides(data.slides || []);
     } catch (e) {
       console.error(e);
@@ -250,7 +287,7 @@ export default function Create() {
       const res = await fetch("/api/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ idea, style, tone, email: session.user.email, isRegenerate: true }),
+        body: JSON.stringify({ idea, style, tone, email: session.user.email, isRegenerate: true, ref: localStorage.getItem("carouselai_ref") }),
       });
       const data = await res.json();
       if (data.error === "limit_reached") {
@@ -604,9 +641,14 @@ export default function Create() {
               {usedCount >= freeLimit
                 ? "You've used all your free carousels this month."
                 : `${freeLimit - usedCount} of ${freeLimit} free carousel${freeLimit === 1 ? "" : "s"} left this month.`}{" "}
-              <Link href="/#pricing" className="text-purple-400 hover:text-purple-300 underline">
+              <Link href="/#pricing" className="text-fuchsia-400 hover:text-fuchsia-300 underline">
                 Upgrade for unlimited
               </Link>
+            </p>
+          )}
+          {!isPro && session?.user?.email && (
+            <p className="text-center text-xs text-zinc-600 mt-2">
+              Invite a friend → you both get +3 free carousels/month. <ReferralLink email={session.user.email} />
             </p>
           )}
           {dailyLimitError && (
