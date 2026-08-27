@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server"
 import OpenAI from "openai"
+import { getServerSession } from "next-auth/next"
+import { authOptions } from "@/lib/auth"
 import { supabase } from "@/lib/supabase"
-import { FREE_LIMIT, DAILY_FAIR_USE_LIMIT, REFERRAL_BONUS, monthlyCountFromRow, dailyCountFromRow, effectiveFreeLimit } from "@/lib/limits"
+import { DAILY_FAIR_USE_LIMIT, REFERRAL_BONUS, monthlyCountFromRow, dailyCountFromRow, effectiveFreeLimit } from "@/lib/limits"
 import { getReferralCode } from "@/lib/referral"
 
 const TONE_PRESETS: Record<string, string> = {
@@ -19,14 +21,23 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "No API key" }, { status: 500 })
     }
 
-    const openai = new OpenAI({ apiKey })
-    const body = await req.json()
-    const { idea, style, tone, email, mode, isRegenerate, ref } = body
-    const toneInstruction = TONE_PRESETS[tone] || TONE_PRESETS.Authority
+    // Identity comes from the server-verified session, never the request
+    // body. Previously any caller could pass an arbitrary `email` and either
+    // burn a real user's free-tier quota, or — worse — ride on a paying
+    // Pro/LTD user's account to get free unlimited gpt-4o generations by
+    // simply knowing (or guessing) their email. There was no check that the
+    // caller actually *was* that person.
+    const session = await getServerSession(authOptions)
+    const email = session?.user?.email
 
     if (!email) {
       return NextResponse.json({ error: "sign_in_required" })
     }
+
+    const openai = new OpenAI({ apiKey })
+    const body = await req.json()
+    const { idea, style, tone, mode, isRegenerate, ref } = body
+    const toneInstruction = TONE_PRESETS[tone] || TONE_PRESETS.Authority
 
     const { data: row } = await supabase
       .from("generation_counts")

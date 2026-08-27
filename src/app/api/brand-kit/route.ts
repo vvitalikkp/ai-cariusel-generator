@@ -1,10 +1,17 @@
 import { NextResponse } from "next/server"
+import { getServerSession } from "next-auth/next"
+import { authOptions } from "@/lib/auth"
 import { supabase } from "@/lib/supabase"
 
-export async function GET(req: Request) {
-  const { searchParams } = new URL(req.url)
-  const email = searchParams.get("email")
-  if (!email) return NextResponse.json({ error: "no_email" }, { status: 400 })
+// Identity comes from the server-verified session on both GET and POST,
+// never from a client-supplied email. Previously any caller could read or
+// overwrite anyone else's brand kit (logo, colors, font, name) just by
+// knowing their email address — this closes that.
+
+export async function GET() {
+  const session = await getServerSession(authOptions)
+  const email = session?.user?.email
+  if (!email) return NextResponse.json({ error: "sign_in_required" }, { status: 401 })
 
   const { data } = await supabase
     .from("user_settings")
@@ -23,8 +30,11 @@ export async function GET(req: Request) {
 }
 
 export async function POST(req: Request) {
-  const { email, brandColor, accentColor, logoUrl, fontFamily, userName, userAvatar } = await req.json()
-  if (!email) return NextResponse.json({ error: "no_email" }, { status: 400 })
+  const session = await getServerSession(authOptions)
+  const email = session?.user?.email
+  if (!email) return NextResponse.json({ error: "sign_in_required" }, { status: 401 })
+
+  const { brandColor, accentColor, logoUrl, fontFamily, userName, userAvatar } = await req.json()
 
   await supabase
     .from("user_settings")
